@@ -71,9 +71,19 @@ jobs:
       - name: コミットして公開
         if: ${{ !inputs.dry_run }}
         id: commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name  "ai-monetize-lab-agent"
           git config user.email "actions@github.com"
+
+          # claude-code-action は actions/checkout が保存した認証情報を
+          # 自前のGitHub Appトークンで上書きし、終了時にそれを失効させる。
+          # そのままでは push が "Invalid username or token" で失敗するため、
+          # GITHUB_TOKEN を使う remote に張り直す。
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
           git add src/content/articles data/cases.json data/rankings.json
 
           if git diff --staged --quiet; then
