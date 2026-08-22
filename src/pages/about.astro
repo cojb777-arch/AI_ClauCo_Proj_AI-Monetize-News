@@ -1,6 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import SubscribeForm from '../components/SubscribeForm.astro';
 import { SITE, PUBLISHER } from '../config';
 ---
 
@@ -32,6 +31,8 @@ import { SITE, PUBLISHER } from '../config';
       <li>売上・利用者数・料金などの具体的な数値は、出典を確認できたものだけを書く。</li>
       <li>確認できなかった数値は「未確認」と明記し、推測で埋めない。</li>
       <li>すべての記事に出典リンクを添える。</li>
+      <li>他サイトの文章をそのまま転載しない。引用する場合は必要最小限にとどめ、出所を明示する。</li>
+      <li>特定の個人や企業について、事実として確認できない不利益な断定を書かない。</li>
       <li>自動生成であることを記事上に明示する。</li>
     </ul>
 
@@ -45,15 +46,10 @@ import { SITE, PUBLISHER } from '../config';
     <h2>運営者情報</h2>
     <ul>
       <li>運営者：{PUBLISHER.name}</li>
-      <li>所在地：{PUBLISHER.address}</li>
       <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
     </ul>
     <p>
       個人情報の取り扱いについては<a href="/privacy/">プライバシーポリシー</a>をご覧ください。
     </p>
-  </div>
-
-  <div style="margin-top: 3rem;">
-    <SubscribeForm compact />
   </div>
 </BaseLayout>

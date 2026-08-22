@@ -66,7 +66,10 @@ AIを使って実際に収益を上げているサービス・サイト・個人
 - 確認できなかった数値は書かない。推測で埋めない。「未確認」と明示する。
 - 二次情報しかない主張は、必ず「〜と報じられている」と出典付きで書く。
 - 日本語で書く。事実と解釈を混ぜない。
-- 誇大な表現（「誰でも」「必ず」「簡単に」）を使わない。`;
+- 誇大な表現（「誰でも」「必ず」「簡単に」）を使わない。
+- 参照元の文章をそのまま写し取らない。読んだ内容を自分の言葉で要約する。
+- 特定の個人・企業について、事実として確認できない不利益な断定（違法、詐欺的、破綻寸前など）を書かない。
+  問題を指摘する場合は、確認できた事実と、それが誰の見解なのかを分けて書く。`;
 
 function researchPrompt(existingArticles, cases) {
   const covered = existingArticles
@@ -127,7 +130,14 @@ const COMPOSE_SYSTEM = `あなたは「AI Monetize Lab」の編集者です。
 - 数値を書くときは、必ず出典で確認できたものに限る。確認できていない数値は書かない。
 - 「まとめ」で締め、読者が次に何を検証すべきかを示す。
 - 本文は 2000〜3500 字程度。誇大な表現は使わない。
-- 本文の Markdown に frontmatter（--- で囲まれた部分）は含めない。h1（#）も使わない。`;
+- 本文の Markdown に frontmatter（--- で囲まれた部分）は含めない。h1（#）も使わない。
+
+著作権・名誉に関する制約:
+- 参照元の文章をコピーしない。事実を自分の言葉で書き直す。
+- 引用が必要な場合のみ、引用部分を blockquote にし、必要最小限の長さにとどめ、
+  直後に出所（サービス名・ページ名）を書く。記事の主体はあくまで自分の分析とする。
+- 料金表などの事実データは、そのまま転記せず、比較しやすい形に整理して出典を添える。
+- 特定の個人・企業について、確認できない不利益な断定を書かない。`;
 
 function composePrompt(brief, sources, existingArticles, cases, rankings) {
   return `以下は今週のリサーチメモです。これをもとに記事とデータ更新を作ってください。
@@ -156,11 +166,10 @@ ${JSON.stringify(rankings.methods.map((method) => ({ id: method.id, name: method
 
 1. article: 今週の記事。slug は半角英小文字とハイフンのみ。category は事例中心なら research、
    手法の解説中心なら howto を選ぶ。sources にはリサーチメモで実際に根拠として使ったURLだけを入れる。
-2. newsletter: この記事を知らせるメールの件名と導入文。件名は40字以内。導入文は3行以内。
-3. case_updates: 事例カタログの更新。一次情報で確認できた変更だけを入れる。
+2. case_updates: 事例カタログの更新。一次情報で確認できた変更だけを入れる。
    既存 id の更新は action="update"、新規追加は action="add"。何もなければ空配列。
    pricing は確認できた場合のみ文字列で入れ、確認できなければ null にする。
-4. ranking_adjustments: ランキングのスコアを変えるべき根拠が今週の調査で得られた場合のみ入れる。
+3. ranking_adjustments: ランキングのスコアを変えるべき根拠が今週の調査で得られた場合のみ入れる。
    変更幅は1点までとし、理由を書く。根拠がなければ空配列にする。空配列が普通の状態です。`;
 }
 
@@ -194,16 +203,6 @@ const OUTPUT_SCHEMA = {
         sources: { type: 'array', items: sourceSchema },
       },
       required: ['slug', 'title', 'description', 'category', 'tags', 'body_markdown', 'sources'],
-      additionalProperties: false,
-    },
-    newsletter: {
-      type: 'object',
-      properties: {
-        subject: { type: 'string' },
-        intro: { type: 'string' },
-        updates: { type: 'array', items: { type: 'string' } },
-      },
-      required: ['subject', 'intro', 'updates'],
       additionalProperties: false,
     },
     case_updates: {
@@ -245,7 +244,7 @@ const OUTPUT_SCHEMA = {
       },
     },
   },
-  required: ['article', 'newsletter', 'case_updates', 'ranking_adjustments'],
+  required: ['article', 'case_updates', 'ranking_adjustments'],
   additionalProperties: false,
 };
 
@@ -442,12 +441,6 @@ async function main() {
       category: data.article.category,
       path: `/articles/${slug}/`,
       sourceCount: sanitizeSources(data.article.sources).length,
-    },
-    newsletter: {
-      slug: TODAY_STR,
-      subject: data.newsletter.subject,
-      intro: data.newsletter.intro,
-      updates: [...data.newsletter.updates, ...caseNotes, ...rankingNotes],
     },
     caseNotes,
     rankingNotes,

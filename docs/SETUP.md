@@ -1,6 +1,6 @@
 # セットアップ手順
 
-初回に一度だけ行う作業です。所要 30〜60分。
+初回に一度だけ行う作業です。所要 15〜30分。
 
 ---
 
@@ -15,111 +15,52 @@ GitHub Actions（毎週月曜 09:00 JST）
    │
    ├─ 2. git commit & push
    │
-   ├─ 3. npm run build（Astro）→ npx wrangler deploy
-   │       静的サイト + API を Cloudflare Workers に配信
-   │
-   └─ 4. scripts/send-newsletter.mjs
-           Worker の /api/newsletter/send を叩く
-              → D1 から購読者を取得
-              → Resend でメール配信（配信停止リンク付き）
+   └─ 3. npm run build（Astro）→ npx wrangler deploy
+           静的サイトを Cloudflare へ配信
 ```
+
+サーバー側の処理は持たないため、データベースもAPIキーの受け渡しも不要です。
 
 ---
 
-## 1. Cloudflare の準備
+## 1. 設定値の差し替え
 
-### 1-1. ログイン
+### `src/config.ts`
+
+| 項目 | 内容 |
+| --- | --- |
+| `SITE.name` | サイト名 |
+| `SITE.tagline` | 一行の説明 |
+| `PUBLISHER.name` | 運営者名（フッターとプライバシーポリシーに表示） |
+| `PUBLISHER.contactEmail` | 掲載内容についての連絡先 |
+
+> 運営者名と連絡先は法的な表示義務ではありませんが、
+> 掲載取り下げの依頼や誤りの指摘を受けられる窓口がないサイトは信頼されません。記載を推奨します。
+
+### `wrangler.toml`
+
+`name` を自分のWorker名に変えます（`https://<name>.<サブドメイン>.workers.dev` になります）。
+
+---
+
+## 2. Cloudflare へのデプロイ
 
 ```bash
 npx wrangler login
-```
-
-### 1-2. D1 データベースを作成
-
-```bash
-npx wrangler d1 create ai-monetize-news
-```
-
-出力される `database_id` を `wrangler.toml` の
-`PLACEHOLDER_REPLACE_WITH_YOUR_D1_DATABASE_ID` と差し替えます。
-
-### 1-3. テーブルを作成
-
-```bash
-npm run db:init          # 本番
-npm run db:init:local    # ローカル開発用
-```
-
-### 1-4. 初回デプロイ
-
-```bash
 npm run deploy
 ```
 
-`https://ai-monetize-news.<あなたのサブドメイン>.workers.dev` で公開されます。
 独自ドメインを使う場合は Cloudflare ダッシュボードの
 Workers & Pages → 対象Worker → Settings → Domains & Routes から追加します。
 
----
-
-## 2. Resend（メール配信）の準備
-
-1. https://resend.com でアカウントを作成
-2. **Domains** から送信ドメインを追加し、表示される DNS レコード
-   （SPF / DKIM / DMARC）を自分のDNSに登録して検証を通す
-3. **API Keys** から APIキーを作成（`Sending access` で十分）
-
-> ドメイン検証を通さないと、迷惑メール判定されるか、そもそも送信できません。
-> ここは省略しないでください。
+> Cloudflare を使わない場合、`npm run build` で出力される `dist/` を
+> GitHub Pages・Netlify・Vercel などにそのまま置けます。
 
 ---
 
-## 3. 設定値の差し替え
+## 3. GitHub の設定
 
-### `wrangler.toml` の `[vars]`
-
-| 変数 | 内容 |
-| --- | --- |
-| `SITE_URL` | 公開URL（末尾スラッシュなし） |
-| `FROM_EMAIL` | 送信元アドレス（Resendで検証したドメインのもの） |
-| `FROM_NAME` | 送信者表示名 |
-| `REPLY_TO_EMAIL` | 返信先・問い合わせ先 |
-| `PUBLISHER_NAME` | 運営者名（**特定電子メール法で表示が義務**） |
-| `PUBLISHER_ADDRESS` | 所在地 |
-
-### `src/config.ts` の `PUBLISHER`
-
-サイト側のフッター・プライバシーポリシーに使われます。同じ値を入れてください。
-
----
-
-## 4. シークレットの登録
-
-### Cloudflare Worker 側
-
-```bash
-# Resend の APIキー
-npx wrangler secret put RESEND_API_KEY
-
-# 配信APIを叩くための共有シークレット（下のコマンドで生成した値を使う）
-npx wrangler secret put NEWSLETTER_SEND_TOKEN
-
-# 配信停止リンクの署名鍵
-npx wrangler secret put UNSUBSCRIBE_SECRET
-```
-
-ランダム値の生成:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-> `UNSUBSCRIBE_SECRET` を後から変更すると、**過去に配信したメールの配信停止リンクがすべて無効になります**。
-> 一度決めたら変更しないでください。
-
-### GitHub 側
-
-リポジトリの Settings → Secrets and variables → Actions で登録します。
+Settings → Secrets and variables → Actions で登録します。
 
 **Secrets**
 
@@ -128,27 +69,22 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 | `ANTHROPIC_API_KEY` | Claude API キー |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare APIトークン（`Edit Cloudflare Workers` 権限） |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare アカウントID |
-| `NEWSLETTER_SEND_TOKEN` | 上で Worker に登録したものと**同じ値** |
 
 **Variables**
 
 | 名前 | 内容 |
 | --- | --- |
-| `SITE_URL` | 公開URL（`wrangler.toml` と同じ値） |
+| `SITE_URL` | 公開URL（末尾スラッシュなし）。canonical・RSS・sitemap に使われます |
 
 ---
 
-## 5. 動作確認
+## 4. 動作確認
 
-### ローカルで動かす
+### ローカルで見る
 
 ```bash
-npm run build          # 先に dist/ を作る
-npm run db:init:local  # ローカルD1にテーブルを作る
-npm run preview        # wrangler dev（http://localhost:8787）
+npm run dev        # http://localhost:4321
 ```
-
-Astro のUIだけを高速に編集したいときは `npm run dev`（API は動きません）。
 
 ### 週次エージェントを試す（書き込みなし）
 
@@ -157,40 +93,42 @@ export ANTHROPIC_API_KEY=sk-ant-...
 npm run agent:weekly -- --dry-run
 ```
 
-生成される記事と更新内容が標準出力に表示されます。問題なければ `--dry-run` を外します。
-
-### 配信を試す（実際には送らない）
-
-```bash
-export SITE_URL=https://...
-export NEWSLETTER_SEND_TOKEN=...
-npm run agent:newsletter -- --dry-run
-```
-
-購読者数だけが返ります。
+生成される記事と更新内容が標準出力に表示されます。
+内容に納得できたら `--dry-run` を外して実行すると、実際にファイルが書き出されます。
 
 ### GitHub Actions から手動実行
 
-Actions → 「週次リサーチと配信」→ Run workflow。
-`dry_run` にチェックを入れると、書き込みも配信も行わずに動作だけ確認できます。
+Actions → 「週次リサーチと公開」→ Run workflow。
+`dry_run` にチェックを入れると、書き込みを行わずに動作だけ確認できます。
 
 ---
 
-## 6. 定期実行について
+## 5. 定期実行について
 
 `schedule` は**デフォルトブランチ上のワークフローだけ**が実行されます。
 作業ブランチのままではcronは動きません。`main` にマージしてください。
 
 cron は UTC で指定します。`0 0 * * 1` は月曜 00:00 UTC = **月曜 09:00 JST** です。
+曜日や時刻を変えるときは `.github/workflows/weekly-research.yml` の `cron` を編集します。
 
 ---
 
-## 7. 公開前チェックリスト
+## 6. 公開前チェックリスト
 
-- [ ] `wrangler.toml` の `database_id` を実IDに差し替えた
-- [ ] `[vars]` の運営者名・所在地・連絡先を実在の値にした
-- [ ] `src/config.ts` の `PUBLISHER` も同じ値にした
-- [ ] Resend の送信ドメインを検証済み（SPF / DKIM / DMARC）
-- [ ] `/privacy/` のプライバシーポリシーを自分の運用に合わせて確認した
-- [ ] テスト用アドレスで購読 → 確認メール → 配信停止まで一通り動かした
-- [ ] 確認メール・配信メールのフッターに運営者名と配信停止リンクが出ている
+- [ ] `src/config.ts` のサイト名・運営者名・連絡先を実在の値にした
+- [ ] `wrangler.toml` の `name` を変えた
+- [ ] GitHub の `SITE_URL` を公開URLに設定した
+- [ ] `/privacy/` と `/about/` の内容を自分の運用に合わせて確認した
+- [ ] `npm run agent:weekly -- --dry-run` で生成される記事の品質を確認した
+
+---
+
+## 7. 将来、広告やアフィリエイトを入れる場合
+
+いまの構成では不要ですが、収益化する段階で以下が必要になります。
+
+- **ステマ規制（景品表示法）** — アフィリエイトリンクや、提供を受けて書いた記事には
+  「広告」「PR」と明示する必要があります。記事の frontmatter に区分を持たせ、
+  該当記事の冒頭に表示する仕組みを足すことになります。
+- **アクセス解析を入れる場合** — 取得する情報と目的をプライバシーポリシーに追記します。
+- **自分で商品を売る場合** — 特定商取引法に基づく表記（氏名・住所・電話番号等）が必要になります。

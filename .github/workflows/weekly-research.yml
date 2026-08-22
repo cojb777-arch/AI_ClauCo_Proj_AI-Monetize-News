@@ -1,4 +1,4 @@
-name: 週次リサーチと配信
+name: 週次リサーチと公開
 
 on:
   schedule:
@@ -8,11 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: '記事を書き込まず、メールも送らずに動作だけ確認する'
-        type: boolean
-        default: false
-      skip_newsletter:
-        description: '記事の生成と公開だけ行い、メール配信はしない'
+        description: '記事を書き込まず、動作だけ確認する'
         type: boolean
         default: false
 
@@ -73,17 +69,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler deploy
-
-      - name: デプロイの反映を待つ
-        if: ${{ !inputs.dry_run && !inputs.skip_newsletter && steps.commit.outputs.changed == 'true' }}
-        run: sleep 30
-
-      - name: ニュースレターを配信
-        if: ${{ !inputs.dry_run && !inputs.skip_newsletter && steps.commit.outputs.changed == 'true' }}
-        env:
-          SITE_URL: ${{ vars.SITE_URL }}
-          NEWSLETTER_SEND_TOKEN: ${{ secrets.NEWSLETTER_SEND_TOKEN }}
-        run: node scripts/send-newsletter.mjs
 
       - name: 実行結果を要約に出力
         if: ${{ always() && !inputs.dry_run }}

@@ -12,12 +12,14 @@ export const SITE = {
   locale: 'ja_JP',
 } as const;
 
-/** 特定電子メール法 第4条に基づく送信者情報。デプロイ前に必ず実在の値へ差し替える。 */
+/**
+ * 運営者情報。フッターとプライバシーポリシーに表示される。
+ * メール配信も物販も行わないため法定の表示義務はないが、
+ * 掲載内容についての連絡先がないサイトは信頼されないので記載を推奨する。
+ */
 export const PUBLISHER = {
   name: '（運営者名を記入）',
   contactEmail: 'contact@example.com',
-  /** 住所の表示義務はないが、記載すると到達率とスパム判定の面で有利。 */
-  address: '（所在地を記入）',
 } as const;
 
 export const NAV = [

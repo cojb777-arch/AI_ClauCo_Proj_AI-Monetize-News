@@ -1,7 +1,6 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import SubscribeForm from '../../components/SubscribeForm.astro';
 import { getPublishedArticles, articleHref, formatDate } from '../../lib/articles';
 import { CATEGORY_LABEL, AUTHOR_LABEL } from '../../config';
 
@@ -100,8 +99,4 @@ const toc = headings.filter((heading) => heading.depth === 2);
     {older ? <a href={articleHref(older)}>← {older.data.title}</a> : <span />}
     {newer ? <a href={articleHref(newer)} style="text-align:right;">{newer.data.title} →</a> : <span />}
   </nav>
-
-  <div style="margin-top: 3rem;">
-    <SubscribeForm heading="続きも週1回、メールで受け取る" compact />
-  </div>
 </BaseLayout>

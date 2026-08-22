@@ -1,5 +1,0 @@
-# ローカル開発用のシークレット。wrangler dev がこのファイルを読み込みます。
-# .dev.vars という名前でコピーして使ってください（.dev.vars は git に入りません）。
-RESEND_API_KEY=re_dummy_local_key
-NEWSLETTER_SEND_TOKEN=local-dev-token
-UNSUBSCRIBE_SECRET=local-dev-unsubscribe-secret-change-me

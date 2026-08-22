@@ -3,17 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "AI収益化の実例とノウハウを毎週リサーチして配信する研究メディア",
+  "description": "AI収益化の実例とノウハウを毎週リサーチして公開する研究メディア",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler dev",
+    "preview": "astro preview",
     "check": "astro check",
     "deploy": "npm run build && wrangler deploy",
-    "db:init": "wrangler d1 execute ai-monetize-news --remote --file=worker/schema.sql",
-    "db:init:local": "wrangler d1 execute ai-monetize-news --local --file=worker/schema.sql",
-    "agent:weekly": "node scripts/weekly-research.mjs",
-    "agent:newsletter": "node scripts/send-newsletter.mjs"
+    "agent:weekly": "node scripts/weekly-research.mjs"
   },
   "dependencies": {
     "astro": "^7.2.4",
@@ -22,7 +19,6 @@
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.120.0",
-    "@cloudflare/workers-types": "^5.20260822.1",
     "typescript": "^7.0.2",
     "wrangler": "^4.125.0",
     "zod": "^4.4.3"

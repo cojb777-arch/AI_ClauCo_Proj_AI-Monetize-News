@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
-import SubscribeForm from '../components/SubscribeForm.astro';
 import { getPublishedArticles, articleHref } from '../lib/articles';
 import { SITE } from '../config';
 import rankings from '../../data/rankings.json';
@@ -30,8 +29,8 @@ const featuredCases = casesData.cases.slice(0, 4);
       出典を必ず添えて公開します。
     </p>
     <div style="display:flex; gap:0.7rem; flex-wrap:wrap;">
-      <a class="btn" href="#subscribe-heading">ニュースレターに登録</a>
-      <a class="btn btn--ghost" href="/articles/">記事を読む</a>
+      <a class="btn" href="/articles/">記事を読む</a>
+      <a class="btn btn--ghost" href="/rss.xml">RSSで購読する</a>
     </div>
   </section>
 
@@ -106,6 +105,10 @@ const featuredCases = casesData.cases.slice(0, 4);
   </section>
 
   <section class="section">
-    <SubscribeForm />
+    <div class="note">
+      <strong>更新をRSSで受け取れます。</strong>
+      毎週月曜に記事を追加しています。
+      <a href="/rss.xml">RSSフィード</a>をお使いのリーダーに登録してください。
+    </div>
   </section>
 </BaseLayout>
