@@ -71,6 +71,41 @@
       "sources": [{ "title": "Cursor 公式サイト", "url": "https://cursor.com/" }]
     },
     {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "url": "https://github.com/features/copilot",
+      "segment": "AI開発ツール",
+      "models": ["フリーミアム", "サブスクリプション", "従量課金"],
+      "summary": "AIコーディング支援サービス。2026年6月1日に従量課金へ移行し、月額に「GitHub AI クレジット」を同梱する形になった。コード補完は非課金のまま、モデルを呼ぶ機能だけをメーターに載せている。",
+      "monetization": "1クレジット=0.01ドル。入力・出力・キャッシュ入力トークンをモデルごとの公開レートで換算して消費する。同梱枠は価格に対応する base と、モデル価格の変動に応じて調整される flex に分かれる。繰り越しはなく毎月1日 00:00:00 UTC にリセット。超過分は追加購入または予算上限で制御。",
+      "pricing": "個人: Free $0（補完2,000回・チャット50回）/ Pro $10（1,500クレジット同梱）/ Pro+ $39（7,000）/ Max $100（20,000）。法人: Business $19・ユーザー/月（標準1,900）/ Enterprise $39・ユーザー/月（標準3,900）。2026-06-01〜2026-09-01の販促期間中は Business 3,000 / Enterprise 7,000。",
+      "revenueNote": "未検証（売上は非公表）",
+      "startedYear": null,
+      "difficulty": 5,
+      "verified": true,
+      "lastChecked": "2026-08-22",
+      "status": "active",
+      "sources": [
+        {
+          "title": "GitHub Copilot is moving to usage-based billing",
+          "url": "https://github.blog/news-insights/company-news/github-copilot-is-moving-to-usage-based-billing/"
+        },
+        {
+          "title": "Usage-based billing for individuals - GitHub Docs",
+          "url": "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-individuals"
+        },
+        {
+          "title": "Usage-based billing for organizations and enterprises - GitHub Docs",
+          "url": "https://docs.github.com/en/copilot/concepts/billing/usage-based-billing-for-organizations-and-enterprises"
+        },
+        {
+          "title": "Models and pricing for GitHub Copilot - GitHub Docs",
+          "url": "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+        },
+        { "title": "GitHub Copilot · Plans & pricing", "url": "https://github.com/features/copilot/plans" }
+      ]
+    },
+    {
       "id": "gumroad-ai-products",
       "name": "Gumroad でのAI生成デジタル商材販売",
       "url": "https://gumroad.com/",
