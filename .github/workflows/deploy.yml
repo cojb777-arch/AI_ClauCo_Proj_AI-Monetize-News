@@ -57,11 +57,10 @@ jobs:
         run: echo "::notice::CLOUDFLARE_API_TOKEN が未設定のため Cloudflare へのデプロイをスキップしました。"
 
   # ── GitHub Pages（サブディレクトリ配信・base は /<repo>） ────────
-  # 有効にするには次の2つが必要:
-  #   1. Settings → Pages → Source を "GitHub Actions" にする
-  #   2. Variables に ENABLE_GITHUB_PAGES = true を追加する
+  # 前提: Settings → Pages → Source が "GitHub Actions" になっていること。
+  # そうなっていない場合、configure-pages が
+  # "Get Pages site failed" で失敗するので、設定漏れがすぐ分かる。
   github-pages:
-    if: ${{ vars.ENABLE_GITHUB_PAGES == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

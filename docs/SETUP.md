@@ -80,10 +80,19 @@ npm run deploy
 
 ### 2-B. GitHub Pages
 
-1. Settings → Pages → **Source を「GitHub Actions」に変更**
-2. Settings → Secrets and variables → Actions → Variables に
-   `ENABLE_GITHUB_PAGES` = `true` を追加
-3. `main` に push すると自動でデプロイされます
+Settings → Pages → **Source を「GitHub Actions」に変更**するだけです。
+`main` に push すると自動でデプロイされ、公開URLが同じ画面に表示されます。
+
+> **その画面の「Configure」ボタンは押さないでください。**
+> 「GitHub Pages Jekyll」「Static HTML」はどちらもサンプルのワークフローを
+> 新規に追加するボタンです。このリポジトリには専用のデプロイ処理
+> （`.github/workflows/deploy.yml`）がすでにあるため、
+> 追加すると Jekyll がAstroのソースをそのままビルドしようとして壊れます。
+> 押してしまった場合は、追加された `.github/workflows/jekyll-gh-pages.yml`
+> （または `static.yml`）を削除してください。
+
+> 公開URLは**最初のデプロイが成功するまで表示されません**。
+> Source を変更した直後は空欄のままですが、異常ではありません。
 
 > プロジェクトサイトは `https://<user>.github.io/<repo>/` というサブディレクトリ配信になります。
 > ワークフローが `BASE_PATH` を自動で渡すので、サイト内リンクは自動で調整されます。
@@ -109,10 +118,12 @@ Settings → Secrets and variables → Actions で登録します。
 | 名前 | 必要な場合 | 内容 |
 | --- | --- | --- |
 | `SITE_URL` | Cloudflareを使う場合 | 公開URL（末尾スラッシュなし） |
-| `ENABLE_GITHUB_PAGES` | GitHub Pagesを使う場合 | `true` |
 
 Cloudflare のシークレットを設定していない場合、該当ジョブは
 「スキップしました」という通知を出して正常終了します。エラーにはなりません。
+
+GitHub Pages 側は Variables の設定は不要です。
+Settings → Pages の Source が「GitHub Actions」になっていれば動きます。
 
 ---
 
@@ -154,7 +165,7 @@ cron は UTC で指定します。`0 0 * * 1` は月曜 00:00 UTC = **月曜 09:
 ## 6. 公開前チェックリスト
 
 - [ ] `src/config.ts` のサイト名・運営者名・連絡先を実在の値にした
-- [ ] 公開先を決めて設定した（Cloudflare のシークレット、または `ENABLE_GITHUB_PAGES`）
+- [ ] 公開先を決めて設定した（Cloudflare のシークレット、または Pages の Source）
 - [ ] Cloudflare を使う場合、`wrangler.toml` の `name` を変えた
 - [ ] `/privacy/` と `/about/` の内容を自分の運用に合わせて確認した
 - [ ] `npm run agent:weekly -- --dry-run` で生成される記事の品質を確認した
