@@ -59,10 +59,19 @@ import { SITE, PUBLISHER } from '../config';
     </p>
 
     <h2>6. 掲載内容に関するご連絡</h2>
-    <p>
-      掲載内容の誤り、権利侵害のご指摘、掲載取り下げのご依頼などがある場合は、
-      下記の連絡先までご連絡ください。確認のうえ、速やかに対応します。
-    </p>
+    {
+      PUBLISHER.contactEmail ? (
+        <p>
+          掲載内容の誤り、権利侵害のご指摘、掲載取り下げのご依頼などがある場合は、
+          下記の連絡先までご連絡ください。確認のうえ、速やかに対応します。
+        </p>
+      ) : (
+        <p>
+          現在、公開の連絡先は設けていません。掲載内容の誤りや権利侵害のご指摘、
+          掲載取り下げのご依頼をいただける窓口を用意でき次第、本ページに掲載します。
+        </p>
+      )
+    }
 
     <h2>7. 本ポリシーの改定</h2>
     <p>
@@ -70,16 +79,19 @@ import { SITE, PUBLISHER } from '../config';
       改定した場合は本ページに掲載します。
     </p>
 
-    <h2>8. 連絡先</h2>
+    <h2>8. 運営者</h2>
     <ul>
       <li>運営者：{PUBLISHER.name}</li>
-      <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
+      {
+        PUBLISHER.contactEmail && (
+          <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
+        )
+      }
     </ul>
 
     <hr />
     <p style="font-size: 0.85rem; color: var(--text-muted);">
-      ※ 本ポリシーは雛形です。運営者名・連絡先を実在の情報に置き換え、
-      解析ツールや広告を導入する際は内容を見直してください。
+      ※ 解析ツールや広告を導入する際は、取得する情報と目的を本ページに追記してください。
     </p>
   </div>
 </BaseLayout>

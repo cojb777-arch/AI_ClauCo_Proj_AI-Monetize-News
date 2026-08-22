@@ -47,7 +47,11 @@ import { url } from '../lib/url';
     <h2>運営者情報</h2>
     <ul>
       <li>運営者：{PUBLISHER.name}</li>
-      <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
+      {
+        PUBLISHER.contactEmail && (
+          <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
+        )
+      }
     </ul>
     <p>
       個人情報の取り扱いについては<a href={url('/privacy/')}>プライバシーポリシー</a>をご覧ください。
