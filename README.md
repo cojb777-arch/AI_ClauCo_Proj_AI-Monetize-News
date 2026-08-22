@@ -22,12 +22,15 @@ AIで収益を上げているサービスの実例と、その収益化ノウハ
 | 層 | 使うもの |
 | --- | --- |
 | サイト | Astro（静的生成） |
-| ホスティング | Cloudflare Workers（静的アセット配信のみ） |
+| ホスティング | Cloudflare Workers または GitHub Pages（どちらも対応） |
 | リサーチ・執筆 | Claude API（Web検索ツール + 構造化出力） |
 | 定期実行 | GitHub Actions（cron） |
 
-サーバー側の処理を持たないため、静的ホスティングであれば
-GitHub Pages・Netlify・Vercel などにもそのまま載せ替えられます。
+サーバー側の処理を持たないため、静的ホスティングならどこにでも置けます。
+GitHub Actions のデプロイワークフローは Cloudflare Workers と GitHub Pages の
+両方に対応していて、設定した方だけが動きます（両方同時でも構いません）。
+サブディレクトリ配信（`<user>.github.io/<repo>/`）でもリンクが壊れないよう、
+サイト内リンクは `BASE_PATH` に追従します。
 
 ---
 
@@ -91,8 +94,9 @@ npm run dev      # http://localhost:4321
 ## 公開前に差し替えるもの
 
 - `src/config.ts` の `SITE`（サイト名）と `PUBLISHER`（運営者名・連絡先）
-- `wrangler.toml` の `name`（Worker名）
-- GitHub の Variables に `SITE_URL`（公開URL）
+- Cloudflare を使う場合: `wrangler.toml` の `name`、GitHub の Variables に `SITE_URL`
+- GitHub Pages を使う場合: Settings → Pages の Source を「GitHub Actions」にし、
+  Variables に `ENABLE_GITHUB_PAGES = true` を追加
 
 `/privacy/` のプライバシーポリシーと `/about/` の免責事項は雛形です。
 公開前に自分の運用に合っているか確認してください（本実装は法的助言ではありません）。

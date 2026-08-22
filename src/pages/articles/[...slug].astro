@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getPublishedArticles, articleHref, formatDate } from '../../lib/articles';
 import { CATEGORY_LABEL, AUTHOR_LABEL } from '../../config';
+import { url } from '../../lib/url';
 
 export async function getStaticPaths() {
   const articles = await getPublishedArticles();
@@ -40,7 +41,7 @@ const toc = headings.filter((heading) => heading.depth === 2);
         data.tags.length > 0 && (
           <ul class="tag-list">
             {data.tags.map((tag) => (
-              <li><a href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}</a></li>
+              <li><a href={url(`/tags/${encodeURIComponent(tag)}/`)}>#{tag}</a></li>
             ))}
           </ul>
         )

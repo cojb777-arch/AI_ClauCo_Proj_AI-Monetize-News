@@ -9,7 +9,8 @@ export async function GET(context: APIContext) {
   return rss({
     title: SITE.name,
     description: SITE.description,
-    site: context.site ?? SITE.name,
+    // context.site は base を含まないため、base を足したサイトURLを渡す。
+    site: new URL(import.meta.env.BASE_URL, context.site ?? context.url).href,
     trailingSlash: true,
     items: articles.map((article) => ({
       title: article.data.title,

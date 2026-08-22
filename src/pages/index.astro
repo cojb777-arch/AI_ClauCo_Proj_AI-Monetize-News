@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import { getPublishedArticles, articleHref } from '../lib/articles';
 import { SITE } from '../config';
+import { url } from '../lib/url';
 import rankings from '../../data/rankings.json';
 import casesData from '../../data/cases.json';
 
@@ -29,15 +30,15 @@ const featuredCases = casesData.cases.slice(0, 4);
       出典を必ず添えて公開します。
     </p>
     <div style="display:flex; gap:0.7rem; flex-wrap:wrap;">
-      <a class="btn" href="/articles/">記事を読む</a>
-      <a class="btn btn--ghost" href="/rss.xml">RSSで購読する</a>
+      <a class="btn" href={url('/articles/')}>記事を読む</a>
+      <a class="btn btn--ghost" href={url('/rss.xml')}>RSSで購読する</a>
     </div>
   </section>
 
   <section class="section">
     <div class="section__head">
       <h2>最新のリサーチ</h2>
-      <a href="/articles/">すべての記事 →</a>
+      <a href={url('/articles/')}>すべての記事 →</a>
     </div>
     {
       latest.length > 0 ? (
@@ -65,14 +66,14 @@ const featuredCases = casesData.cases.slice(0, 4);
   <section class="section">
     <div class="section__head">
       <h2>収益化手法ランキング（上位3件）</h2>
-      <a href="/rankings/">全6手法を見る →</a>
+      <a href={url('/rankings/')}>全6手法を見る →</a>
     </div>
     <div class="grid">
       {
         topMethods.map((method, index) => (
           <article class="card">
             <span class="badge badge--accent">{index + 1}位 / {scoreTotal(method.scores)}点</span>
-            <h3><a href={`/rankings/#${method.id}`}>{method.name}</a></h3>
+            <h3><a href={url(`/rankings/#${method.id}`)}>{method.name}</a></h3>
             <p>{method.summary}</p>
             <div class="card__meta">向いている人：{method.bestFor}</div>
           </article>
@@ -84,14 +85,14 @@ const featuredCases = casesData.cases.slice(0, 4);
   <section class="section">
     <div class="section__head">
       <h2>収益化事例カタログ</h2>
-      <a href="/cases/">全{casesData.cases.length}件を見る →</a>
+      <a href={url('/cases/')}>全{casesData.cases.length}件を見る →</a>
     </div>
     <div class="grid">
       {
         featuredCases.map((item) => (
           <article class="card">
             <span class="badge">{item.segment}</span>
-            <h3><a href={`/cases/#${item.id}`}>{item.name}</a></h3>
+            <h3><a href={url(`/cases/#${item.id}`)}>{item.name}</a></h3>
             <p>{item.summary}</p>
             <div class="card__meta">
               {item.models.map((model: string) => (
@@ -108,7 +109,7 @@ const featuredCases = casesData.cases.slice(0, 4);
     <div class="note">
       <strong>更新をRSSで受け取れます。</strong>
       毎週月曜に記事を追加しています。
-      <a href="/rss.xml">RSSフィード</a>をお使いのリーダーに登録してください。
+      <a href={url('/rss.xml')}>RSSフィード</a>をお使いのリーダーに登録してください。
     </div>
   </section>
 </BaseLayout>

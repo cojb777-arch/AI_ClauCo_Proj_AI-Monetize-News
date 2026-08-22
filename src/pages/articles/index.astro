@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import { getPublishedArticles, getTagCounts, articleHref } from '../../lib/articles';
 import { CATEGORY_LABEL } from '../../config';
+import { url } from '../../lib/url';
 
 const articles = await getPublishedArticles();
 const tags = await getTagCounts();
@@ -28,7 +29,7 @@ const countByCategory = Object.fromEntries(
       <ul class="tag-list" style="margin: 1.5rem 0 2.5rem;">
         {tags.map(([tag, count]) => (
           <li>
-            <a href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}（{count}）</a>
+            <a href={url(`/tags/${encodeURIComponent(tag)}/`)}>#{tag}（{count}）</a>
           </li>
         ))}
       </ul>

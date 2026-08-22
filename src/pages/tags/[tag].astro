@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import { getPublishedArticles, articleHref } from '../../lib/articles';
+import { url } from '../../lib/url';
 
 export async function getStaticPaths() {
   const articles = await getPublishedArticles();
@@ -37,5 +38,5 @@ const { tag, articles } = Astro.props;
       ))
     }
   </div>
-  <p style="margin-top: 2.5rem;"><a href="/articles/">← 記事一覧へ戻る</a></p>
+  <p style="margin-top: 2.5rem;"><a href={url('/articles/')}>← 記事一覧へ戻る</a></p>
 </BaseLayout>

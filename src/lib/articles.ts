@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { url } from './url';
 
 export type Article = CollectionEntry<'articles'>;
 
@@ -25,7 +26,7 @@ export async function getTagCounts(): Promise<Array<[string, number]>> {
   return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'));
 }
 
-export const articleHref = (article: Article) => `/articles/${article.id}/`;
+export const articleHref = (article: Article) => url(`/articles/${article.id}/`);
 
 export const formatDate = (date: Date) =>
   date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });

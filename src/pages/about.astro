@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE, PUBLISHER } from '../config';
+import { url } from '../lib/url';
 ---
 
 <BaseLayout title="このサイトについて" description={SITE.description} narrow>
@@ -49,7 +50,7 @@ import { SITE, PUBLISHER } from '../config';
       <li>連絡先：<a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a></li>
     </ul>
     <p>
-      個人情報の取り扱いについては<a href="/privacy/">プライバシーポリシー</a>をご覧ください。
+      個人情報の取り扱いについては<a href={url('/privacy/')}>プライバシーポリシー</a>をご覧ください。
     </p>
   </div>
 </BaseLayout>
