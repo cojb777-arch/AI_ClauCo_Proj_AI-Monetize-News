@@ -29,5 +29,8 @@ jobs:
       - name: 型チェック
         run: npx tsc --noEmit
 
+      - name: 記事とデータを検証
+        run: npm run validate
+
       - name: サイトをビルド
         run: npm run build

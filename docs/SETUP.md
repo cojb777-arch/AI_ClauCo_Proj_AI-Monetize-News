@@ -9,17 +9,21 @@
 ```
 GitHub Actions（毎週月曜 09:00 JST）
    │
-   ├─ 1. scripts/weekly-research.mjs
-   │       Claude が Web検索でAI収益化事例を調査 → 記事Markdownを生成
+   ├─ 1. claude-code-action（Claude のサブスク枠で動く）
+   │       docs/agent/weekly-research.md の手順書に従って
+   │       Web検索で事例を調査 → 記事Markdownを生成
    │       data/cases.json・data/rankings.json も更新
    │
-   ├─ 2. git commit & push
+   ├─ 2. scripts/validate-content.mjs で検証
+   │       ルール違反があればここで停止し、コミットしない
    │
-   └─ 3. npm run build（Astro）→ npx wrangler deploy
-           静的サイトを Cloudflare へ配信
+   ├─ 3. git commit & push
+   │
+   └─ 4. npm run build（Astro）→ Cloudflare / GitHub Pages へ配信
 ```
 
-サーバー側の処理は持たないため、データベースもAPIキーの受け渡しも不要です。
+サーバー側の処理は持たないため、データベースは不要です。
+リサーチは Claude のサブスクリプション枠で動くので、Anthropic API キーも不要です。
 
 ---
 
@@ -123,9 +127,30 @@ Settings → Secrets and variables → Actions で登録します。
 
 | 名前 | 必要な場合 | 内容 |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | 常に必要 | Claude API キー |
+| `CLAUDE_CODE_OAUTH_TOKEN` | 週次リサーチを動かす場合 | Claude サブスクリプションのトークン（下記参照） |
 | `CLOUDFLARE_API_TOKEN` | Cloudflareを使う場合 | `Edit Cloudflare Workers` 権限のAPIトークン |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflareを使う場合 | Cloudflare アカウントID |
+
+### CLAUDE_CODE_OAUTH_TOKEN の取り方
+
+週次エージェントは **Claude のサブスクリプション（Pro / Max）の枠**で動きます。
+Anthropic API の従量課金は発生しません。
+
+手元のターミナルで次を実行します。
+
+```bash
+claude setup-token
+```
+
+ブラウザが開いて認証を求められ、完了するとトークンが表示されます。
+その値を GitHub の Secrets に `CLAUDE_CODE_OAUTH_TOKEN` という名前で登録してください。
+
+> **注意**
+> - このトークンは、実行した人のサブスクリプションに紐づきます。
+>   週次リサーチの消費は、普段 Claude Code や Claude アプリを使う枠と共通です。
+> - 有効期限があります。切れたら同じ手順で発行し直して Secrets を更新してください。
+> - 手元で Claude Code を使うときに `ANTHROPIC_API_KEY` を環境変数に設定していると、
+>   サブスクではなくAPI従量課金が使われます。設定していないか確認してください。
 
 **Variables**
 
@@ -149,20 +174,21 @@ Settings → Pages の Source が「GitHub Actions」になっていれば動き
 npm run dev        # http://localhost:4321
 ```
 
-### 週次エージェントを試す（書き込みなし）
+### 週次エージェントを試す（公開なし）
+
+Actions → 「週次リサーチと公開」→ Run workflow で、
+**`dry_run` にチェックを入れて実行**します。
+
+エージェントが記事を書いて検証まで行いますが、コミットも公開もしません。
+生成された記事の全文は、実行結果の Summary に表示されるのでそこで品質を確認できます。
+
+納得できたらチェックを外して実行すると、実際に公開されます。
+
+### 記事の内容だけ検証する
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-npm run agent:weekly -- --dry-run
+npm run validate
 ```
-
-生成される記事と更新内容が標準出力に表示されます。
-内容に納得できたら `--dry-run` を外して実行すると、実際にファイルが書き出されます。
-
-### GitHub Actions から手動実行
-
-Actions → 「週次リサーチと公開」→ Run workflow。
-`dry_run` にチェックを入れると、書き込みを行わずに動作だけ確認できます。
 
 ---
 
@@ -182,7 +208,8 @@ cron は UTC で指定します。`0 0 * * 1` は月曜 00:00 UTC = **月曜 09:
 - [ ] 公開先を決めて設定した（Cloudflare のシークレット、または Pages の Source）
 - [ ] Cloudflare を使う場合、`wrangler.toml` の `name` を変えた
 - [ ] `/privacy/` と `/about/` の内容を自分の運用に合わせて確認した
-- [ ] `npm run agent:weekly -- --dry-run` で生成される記事の品質を確認した
+- [ ] `CLAUDE_CODE_OAUTH_TOKEN` を登録した
+- [ ] 週次リサーチを `dry_run` で1回実行し、生成される記事の品質を確認した
 
 ---
 

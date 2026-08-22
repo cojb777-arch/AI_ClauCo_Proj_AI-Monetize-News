@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: '記事を書き込まず、動作だけ確認する'
+        description: '記事を生成して検証まで行い、コミット・公開はしない'
         type: boolean
         default: false
 
@@ -19,7 +19,7 @@ concurrency:
 jobs:
   research:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: write
     outputs:
@@ -37,42 +37,71 @@ jobs:
       - name: 依存関係をインストール
         run: npm ci
 
+      # Claude のサブスクリプション枠で動く（APIキー不要）。
+      # トークンは手元で `claude setup-token` を実行して発行し、
+      # CLAUDE_CODE_OAUTH_TOKEN として Secrets に登録する。
       - name: リサーチと記事生成
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node scripts/weekly-research.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            docs/agent/weekly-research.md を読み、そこに書かれた週次リサーチの手順を最後まで実行してください。
 
-      - name: 生成物をコミット
+            重要な点:
+            - 手順書の「絶対に守るルール」と「完了条件」に従ってください。
+            - 変更してよいのは src/content/articles/ への新規追加、data/cases.json、data/rankings.json だけです。
+            - 既存の記事ファイルは編集も削除もしないでください。
+            - 作業の最後に `node scripts/validate-content.mjs` と `npm run build` を実行し、
+              両方が成功することを必ず確認してください。失敗したら直してから再実行してください。
+            - git のコミットとプッシュは行わないでください。ワークフロー側で行います。
+          claude_args: |
+            --model claude-opus-5
+            --max-turns 80
+            --allowedTools "WebSearch,WebFetch,Read,Write,Edit,Glob,Grep,Bash(node scripts/validate-content.mjs),Bash(npm run build)"
+
+      - name: 生成物を検証
+        run: node scripts/validate-content.mjs
+
+      - name: サイトがビルドできることを確認
+        run: npm run build
+
+      - name: コミットして公開
         if: ${{ !inputs.dry_run }}
         id: commit
         run: |
           git config user.name  "ai-monetize-lab-agent"
           git config user.email "actions@github.com"
           git add src/content/articles data/cases.json data/rankings.json
+
           if git diff --staged --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "変更はありませんでした。"
-          else
-            SLUG=$(node -e "console.log(require('./.agent-run.json').slug)")
-            git commit -m "content: 週次リサーチ ${SLUG}"
-            git push
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: 実行結果を要約に出力
-        if: ${{ always() && !inputs.dry_run }}
+          SLUG=$(git diff --staged --name-only --diff-filter=A -- src/content/articles \
+                  | head -1 | xargs -r basename | sed 's/\.md$//')
+          git commit -m "content: 週次リサーチ ${SLUG:-$(date +%Y-%m-%d)}"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: 生成内容を確認用に出力（dry-run）
+        if: ${{ inputs.dry_run }}
         run: |
-          if [ -f .agent-run.json ]; then
-            {
-              echo "### 週次リサーチの結果"
-              echo ""
-              echo "- 記事: $(node -e "console.log(require('./.agent-run.json').article.title)")"
-              echo "- 出典数: $(node -e "console.log(require('./.agent-run.json').article.sourceCount)")"
-              echo "- カタログ更新: $(node -e "console.log(require('./.agent-run.json').caseNotes.length)") 件"
-              echo "- ランキング調整: $(node -e "console.log(require('./.agent-run.json').rankingNotes.length)") 件"
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
+          echo "### dry-run のためコミットしていません" >> "$GITHUB_STEP_SUMMARY"
+          echo '' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          git status --porcelain -uall >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          for f in $(git status --porcelain -uall -- src/content/articles | awk '{print $2}'); do
+            echo "<details><summary>$f</summary>" >> "$GITHUB_STEP_SUMMARY"
+            echo '' >> "$GITHUB_STEP_SUMMARY"
+            echo '```markdown' >> "$GITHUB_STEP_SUMMARY"
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo '</details>' >> "$GITHUB_STEP_SUMMARY"
+          done
 
   # GITHUB_TOKEN による push は他のワークフローを起動しないため、
   # デプロイはここから明示的に呼び出す。

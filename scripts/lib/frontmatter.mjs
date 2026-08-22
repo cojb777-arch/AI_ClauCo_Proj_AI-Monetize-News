@@ -49,22 +49,36 @@ const unquote = (value) => {
   return trimmed;
 };
 
-/** serializeFrontmatter が書いた形式を読み戻す。 */
+/**
+ * 記事の frontmatter を読み戻す。
+ * 扱う形式は serializeFrontmatter が書くもの、および
+ * docs/agent/weekly-research.md でエージェントに指示している形式に限る。
+ * 汎用のYAMLパーサではない。
+ */
 export function parseFrontmatter(raw) {
   const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(raw);
-  if (!match) return { data: {}, body: raw };
+  if (!match) return { data: {}, body: raw, hasFrontmatter: false };
 
   const data = {};
+  const lines = match[1].split(/\r?\n/);
 
-  for (const line of match[1].split(/\r?\n/)) {
-    // ネストした行（sources のリストなど）はここでは読まない
-    if (/^\s/.test(line) || line.trim() === '') continue;
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    if (line.trim() === '' || /^\s/.test(line)) continue;
 
     const separator = line.indexOf(':');
     if (separator === -1) continue;
 
     const key = line.slice(0, separator).trim();
     const rest = line.slice(separator + 1).trim();
+
+    // sources: の直後に続くインデント行をまとめて読む
+    if (key === 'sources' && rest === '') {
+      const { items, nextIndex } = parseObjectList(lines, i + 1);
+      data.sources = items;
+      i = nextIndex - 1;
+      continue;
+    }
 
     if (rest === '') continue;
 
@@ -78,5 +92,30 @@ export function parseFrontmatter(raw) {
     }
   }
 
-  return { data, body: match[2] };
+  return { data, body: match[2], hasFrontmatter: true };
+}
+
+/** `  - key: value` 形式のオブジェクト配列を読む */
+function parseObjectList(lines, start) {
+  const items = [];
+  let current = null;
+  let index = start;
+
+  for (; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.trim() === '') continue;
+    if (!/^\s/.test(line)) break;
+
+    const entry = /^\s*-\s*([A-Za-z_][\w]*)\s*:\s*(.*)$/.exec(line);
+    if (entry) {
+      current = { [entry[1]]: unquote(entry[2]) };
+      items.push(current);
+      continue;
+    }
+
+    const field = /^\s+([A-Za-z_][\w]*)\s*:\s*(.*)$/.exec(line);
+    if (field && current) current[field[1]] = unquote(field[2]);
+  }
+
+  return { items, nextIndex: index };
 }
