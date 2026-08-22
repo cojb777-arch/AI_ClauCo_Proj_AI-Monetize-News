@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "deploy": "npm run build && wrangler deploy",
-    "agent:weekly": "node scripts/weekly-research.mjs"
+    "validate": "node scripts/validate-content.mjs --local"
   },
   "dependencies": {
     "astro": "^7.2.4",
@@ -18,9 +18,7 @@
     "@astrojs/sitemap": "^3.7.3"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^0.120.0",
     "typescript": "^7.0.2",
-    "wrangler": "^4.125.0",
-    "zod": "^4.4.3"
+    "wrangler": "^4.125.0"
   }
 }

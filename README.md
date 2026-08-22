@@ -23,7 +23,8 @@ AIで収益を上げているサービスの実例と、その収益化ノウハ
 | --- | --- |
 | サイト | Astro（静的生成） |
 | ホスティング | Cloudflare Workers または GitHub Pages（どちらも対応） |
-| リサーチ・執筆 | Claude API（Web検索ツール + 構造化出力） |
+| リサーチ・執筆 | Claude Code（GitHub Actions 上で実行） |
+| 認証 | Claude のサブスクリプション（Pro / Max）。APIキー不要 |
 | 定期実行 | GitHub Actions（cron） |
 
 サーバー側の処理を持たないため、静的ホスティングならどこにでも置けます。
@@ -45,9 +46,11 @@ data/
   cases.json           収益化事例カタログ
   rankings.json        手法ランキング
 scripts/
-  weekly-research.mjs  週次リサーチエージェント
+  validate-content.mjs 生成物の検証（ルール違反を機械的に弾く）
+docs/
+  agent/weekly-research.md  週次エージェントへの手順書
+  SETUP.md                  セットアップ手順
 .github/workflows/     定期実行・デプロイ・CI
-docs/SETUP.md          セットアップ手順
 ```
 
 ---
@@ -67,9 +70,33 @@ npm run dev      # http://localhost:4321
 | `npm run build` | サイトをビルド（`dist/`） |
 | `npm run preview` | ビルド結果をローカルで確認 |
 | `npm run deploy` | ビルドして Cloudflare へデプロイ |
-| `npm run agent:weekly -- --dry-run` | 週次リサーチを書き込みなしで試す |
+| `npm run validate` | 記事とデータの内容を検証する |
 
 ---
+
+## 週次エージェントの仕組み
+
+毎週月曜、GitHub Actions が Claude Code を起動します。エージェントは
+[`docs/agent/weekly-research.md`](docs/agent/weekly-research.md) の手順書を読んで、
+Web検索で事例を調べ、記事を書き、事例カタログとランキングを更新します。
+
+認証には **Claude のサブスクリプション（Pro / Max）** を使うため、
+Anthropic API の従量課金は発生しません。手元で `claude setup-token` を実行して
+得たトークンを、GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` として登録します。
+
+エージェントはコードで縛られていないので、書かれた内容は
+`scripts/validate-content.mjs` が機械的に検証します。
+検証に落ちたものはコミットされず、公開されません。
+
+| 検証項目 | 内容 |
+| --- | --- |
+| 変更範囲 | 記事の新規追加と2つのJSON以外を触っていないか |
+| 既存記事 | 編集・削除されていないか（追加のみ許可） |
+| frontmatter | 必須項目、日付形式、カテゴリ、タグ数 |
+| 出典 | 1件以上あるか、URLが実在する形式か |
+| 本文 | h1を使っていないか、短すぎないか |
+| 事例カタログ | JSONが壊れていないか、id重複、事例が減っていないか |
+| ランキング | スコアが1〜5か、変更幅が1点以内か、理由が残っているか |
 
 ## 記事の品質と法的リスクへの配慮
 
