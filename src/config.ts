@@ -17,10 +17,15 @@ export const SITE = {
  * メール配信も物販も行わないため法定の表示義務はないが、
  * 掲載内容についての連絡先がないサイトは信頼されないので記載を推奨する。
  */
-export const PUBLISHER = {
-  name: '（運営者名を記入）',
-  contactEmail: 'contact@example.com',
-} as const;
+export const PUBLISHER: { name: string; contactEmail: string } = {
+  name: 'coco',
+  /**
+   * 連絡先。空文字にすると、フッターと各ページから連絡先の表示が消える。
+   * 掲載内容の誤りの指摘や取り下げ依頼を受ける窓口になるため、
+   * 用意できるなら記入しておくとよい。
+   */
+  contactEmail: '',
+};
 
 export const NAV = [
   { href: '/', label: 'ホーム' },

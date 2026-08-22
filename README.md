@@ -118,9 +118,19 @@ Anthropic API の従量課金は発生しません。手元で `claude setup-tok
 - 特定の個人・企業について、確認できない不利益な断定を書かない
 - 問題を指摘する場合は、確認できた事実と誰の見解かを分けて書く
 
+## 運用中に困ったら
+
+週次リサーチが失敗するようになったら、まず**トークンの期限切れ**を疑ってください。
+症状の見分け方と復旧手順は
+[`docs/SETUP.md` の「困ったときは」](docs/SETUP.md#7-困ったときは)にまとめてあります。
+
+要点だけ書くと、手元で `claude setup-token` を実行し直し、
+GitHub の Secrets の `CLAUDE_CODE_OAUTH_TOKEN` を新しい値で上書きするだけです。
+
 ## 公開前に差し替えるもの
 
 - `src/config.ts` の `SITE`（サイト名）と `PUBLISHER`（運営者名・連絡先）
+  - 連絡先は空にすると、フッターと各ページから連絡先の表示が消えます
 - Cloudflare を使う場合: `wrangler.toml` の `name`、GitHub の Variables に `SITE_URL`
 - GitHub Pages を使う場合: Settings → Pages の Source を「GitHub Actions」に変更
   （同じ画面の「Configure」ボタンは押さないこと。デプロイ処理はすでにあります）
