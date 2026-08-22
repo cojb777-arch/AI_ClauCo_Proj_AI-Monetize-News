@@ -1,0 +1,42 @@
+# Dependabot の設定
+#
+# ワークフローのアクションはコミットSHAで固定している（サプライチェーン対策）。
+# 固定したままだと更新が届かなくなるため、Dependabot に
+# 「SHAを新しい版に上げるプルリクエスト」を作らせて補う。
+# 自動では適用されないので、中身を確認してからマージできる。
+version: 2
+
+updates:
+  # GitHub Actions（固定したSHAの更新）
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "10:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+    groups:
+      # 公式アクションはまとめて1つのPRにする
+      github-official:
+        patterns:
+          - "actions/*"
+
+  # npm パッケージ（Astro など）
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+      time: "10:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+    groups:
+      # パッチ・マイナー更新はまとめて1つのPRにする
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
