@@ -69,7 +69,21 @@ npm run deploy
 
 `wrangler.toml` の `name` を自分のWorker名に変えてください
 （`https://<name>.<サブドメイン>.workers.dev` になります）。
-独自ドメインは Workers & Pages → 対象Worker → Settings → Domains & Routes から追加します。
+独自ドメインは Workers & Pages → 対象Worker → 設定 → ドメインとルート から追加します。
+
+> **「有効な URL がありません」と表示される場合**
+> デプロイは成功しているのに外から見られない、という状態です。
+> workers.dev の公開が無効になっているのが原因で、`wrangler.toml` の
+> `workers_dev = true` で有効になります（設定済み）。
+> ダッシュボードから直す場合は、対象Worker → 設定 → ドメインとルート →
+> workers.dev を「有効」に切り替えます。
+
+> **ダッシュボードからGitHubリポジトリを接続する場合（Workers Builds）**
+> 「プロジェクト名」は `wrangler.toml` の `name` と**同じ値**にしてください。
+> 食い違うと、意図しない名前の Worker が作られます。
+> ビルドコマンドは `npm run build`、デプロイコマンドは `npx wrangler deploy` です。
+> 「Protect with Cloudflare Access」は**オフのまま**にしてください。
+> オンにすると閲覧にログインが必要になり、検索エンジンもクロールできなくなります。
 
 > **Workers と Pages のどちらを使うべきか**
 > 静的サイトの配信に関しては、どちらも同じことができます。

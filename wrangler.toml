@@ -3,6 +3,11 @@
 name = "ai-monetize-news"
 compatibility_date = "2026-08-01"
 
+# <name>.<サブドメイン>.workers.dev で公開する。
+# false（または未指定でダッシュボード側が無効のまま）だと
+# デプロイは成功するのに「有効な URL がありません」となり、外から見られない。
+workers_dev = true
+
 [assets]
 directory = "./dist"
 html_handling = "auto-trailing-slash"
