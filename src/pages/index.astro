@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import SubscribeForm from '../components/SubscribeForm.astro';
+import { getPublishedArticles, articleHref } from '../lib/articles';
+import { SITE } from '../config';
+import rankings from '../../data/rankings.json';
+import casesData from '../../data/cases.json';
+
+const articles = await getPublishedArticles();
+const latest = articles.slice(0, 6);
+
+const scoreTotal = (scores: Record<string, number>) =>
+  Object.values(scores).reduce((sum, value) => sum + value, 0);
+
+const topMethods = [...rankings.methods]
+  .sort((a, b) => scoreTotal(b.scores) - scoreTotal(a.scores))
+  .slice(0, 3);
+
+const featuredCases = casesData.cases.slice(0, 4);
+---
+
+<BaseLayout>
+  <section class="hero">
+    <span class="hero__eyebrow">毎週月曜 更新</span>
+    <h1>{SITE.tagline}</h1>
+    <p class="lead">
+      AIで収益を上げているサービスを実際に調べ、「何で稼いでいるのか」「どう真似できるのか」を
+      構造として書き残す研究メディアです。リサーチと執筆はエージェントが週1回自動で実行し、
+      出典を必ず添えて公開します。
+    </p>
+    <div style="display:flex; gap:0.7rem; flex-wrap:wrap;">
+      <a class="btn" href="#subscribe-heading">ニュースレターに登録</a>
+      <a class="btn btn--ghost" href="/articles/">記事を読む</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2>最新のリサーチ</h2>
+      <a href="/articles/">すべての記事 →</a>
+    </div>
+    {
+      latest.length > 0 ? (
+        <div class="grid">
+          {latest.map((article) => (
+            <ArticleCard
+              href={articleHref(article)}
+              title={article.data.title}
+              description={article.data.description}
+              pubDate={article.data.pubDate}
+              category={article.data.category}
+              author={article.data.author}
+              sourceCount={article.data.sources.length}
+            />
+          ))}
+        </div>
+      ) : (
+        <p class="note">
+          まだ記事がありません。週次エージェントが最初のリサーチを実行すると、ここに並びます。
+        </p>
+      )
+    }
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2>収益化手法ランキング（上位3件）</h2>
+      <a href="/rankings/">全6手法を見る →</a>
+    </div>
+    <div class="grid">
+      {
+        topMethods.map((method, index) => (
+          <article class="card">
+            <span class="badge badge--accent">{index + 1}位 / {scoreTotal(method.scores)}点</span>
+            <h3><a href={`/rankings/#${method.id}`}>{method.name}</a></h3>
+            <p>{method.summary}</p>
+            <div class="card__meta">向いている人：{method.bestFor}</div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section__head">
+      <h2>収益化事例カタログ</h2>
+      <a href="/cases/">全{casesData.cases.length}件を見る →</a>
+    </div>
+    <div class="grid">
+      {
+        featuredCases.map((item) => (
+          <article class="card">
+            <span class="badge">{item.segment}</span>
+            <h3><a href={`/cases/#${item.id}`}>{item.name}</a></h3>
+            <p>{item.summary}</p>
+            <div class="card__meta">
+              {item.models.map((model: string) => (
+                <span class="badge">{model}</span>
+              ))}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <SubscribeForm />
+  </section>
+</BaseLayout>

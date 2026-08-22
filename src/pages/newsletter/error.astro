@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { PUBLISHER } from '../../config';
+---
+
+<BaseLayout title="手続きを完了できませんでした" narrow noindex>
+  <h1>手続きを完了できませんでした</h1>
+  <div class="prose">
+    <p>
+      リンクの有効期限が切れているか、すでに使用済みの可能性があります。
+    </p>
+    <p>
+      確認メールのリンクは発行から7日間有効です。期限が切れている場合は、
+      <a href="/newsletter/">こちら</a>からもう一度ご登録ください。
+    </p>
+    <p>
+      配信停止が完了しない場合は、
+      <a href={`mailto:${PUBLISHER.contactEmail}`}>{PUBLISHER.contactEmail}</a>
+      までご連絡ください。手動で停止処理を行います。
+    </p>
+    <p><a class="btn btn--ghost" href="/">トップページへ戻る</a></p>
+  </div>
+</BaseLayout>

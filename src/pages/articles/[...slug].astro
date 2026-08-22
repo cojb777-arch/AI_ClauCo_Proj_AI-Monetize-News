@@ -1,0 +1,107 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
+import { getPublishedArticles, articleHref, formatDate } from '../../lib/articles';
+import { CATEGORY_LABEL, AUTHOR_LABEL } from '../../config';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  return articles.map((article, index) => ({
+    params: { slug: article.id },
+    props: {
+      article,
+      newer: articles[index - 1] ?? null,
+      older: articles[index + 1] ?? null,
+    },
+  }));
+}
+
+const { article, newer, older } = Astro.props;
+const { Content, headings } = await render(article);
+const { data } = article;
+const toc = headings.filter((heading) => heading.depth === 2);
+---
+
+<BaseLayout title={data.title} description={data.description} narrow>
+  <article>
+    <header style="margin-bottom: 2rem;">
+      <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+        <span class="badge badge--accent">{CATEGORY_LABEL[data.category] ?? data.category}</span>
+        <span class="badge">{AUTHOR_LABEL[data.author] ?? data.author}</span>
+      </div>
+      <h1 style="margin-bottom: 0.75rem;">{data.title}</h1>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem;">
+        公開 <time datetime={data.pubDate.toISOString()}>{formatDate(data.pubDate)}</time>
+        {data.updatedDate && (
+          <> / 更新 <time datetime={data.updatedDate.toISOString()}>{formatDate(data.updatedDate)}</time></>
+        )}
+      </p>
+      {
+        data.tags.length > 0 && (
+          <ul class="tag-list">
+            {data.tags.map((tag) => (
+              <li><a href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}</a></li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        data.author === 'agent' && (
+          <p class="note" style="margin-top: 1.5rem;">
+            <strong>この記事はリサーチエージェントが自動生成しました。</strong>
+            公開時点の一次情報をもとにしていますが、料金や仕様は変更される場合があります。
+            重要な判断の前には末尾の出典で必ず原典をご確認ください。
+          </p>
+        )
+      }
+    </header>
+
+    {
+      toc.length > 2 && (
+        <nav class="note" style="margin-bottom: 2rem;" aria-label="目次">
+          <strong>目次</strong>
+          <ol style="margin: 0.6rem 0 0; padding-left: 1.2rem;">
+            {toc.map((heading) => (
+              <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    {
+      data.sources.length > 0 && (
+        <section style="margin-top: 3rem;">
+          <h2 style="font-size: 1.15rem; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem;">
+            出典
+          </h2>
+          <ol style="font-size: 0.88rem; color: var(--text-muted); padding-left: 1.3rem;">
+            {data.sources.map((source) => (
+              <li style="margin-bottom: 0.5rem;">
+                <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a>
+                {source.publisher && <span>（{source.publisher}）</span>}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+  </article>
+
+  <nav
+    style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); font-size:0.88rem;"
+    aria-label="前後の記事"
+  >
+    {older ? <a href={articleHref(older)}>← {older.data.title}</a> : <span />}
+    {newer ? <a href={articleHref(newer)} style="text-align:right;">{newer.data.title} →</a> : <span />}
+  </nav>
+
+  <div style="margin-top: 3rem;">
+    <SubscribeForm heading="続きも週1回、メールで受け取る" compact />
+  </div>
+</BaseLayout>

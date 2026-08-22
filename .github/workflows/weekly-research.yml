@@ -1,0 +1,100 @@
+name: 週次リサーチと配信
+
+on:
+  schedule:
+    # 毎週月曜 09:00 JST（= 00:00 UTC）
+    # 注意: schedule はデフォルトブランチ上のワークフローだけが実行されます。
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '記事を書き込まず、メールも送らずに動作だけ確認する'
+        type: boolean
+        default: false
+      skip_newsletter:
+        description: '記事の生成と公開だけ行い、メール配信はしない'
+        type: boolean
+        default: false
+
+concurrency:
+  group: weekly-research
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: リサーチと記事生成
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/weekly-research.mjs ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: 生成物をコミット
+        if: ${{ !inputs.dry_run }}
+        id: commit
+        run: |
+          git config user.name  "ai-monetize-lab-agent"
+          git config user.email "actions@github.com"
+          git add src/content/articles data/cases.json data/rankings.json
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "変更はありませんでした。"
+          else
+            SLUG=$(node -e "console.log(require('./.agent-run.json').slug)")
+            git commit -m "content: 週次リサーチ ${SLUG}"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: サイトをビルド
+        if: ${{ !inputs.dry_run && steps.commit.outputs.changed == 'true' }}
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: npm run build
+
+      - name: Cloudflare へデプロイ
+        if: ${{ !inputs.dry_run && steps.commit.outputs.changed == 'true' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
+
+      - name: デプロイの反映を待つ
+        if: ${{ !inputs.dry_run && !inputs.skip_newsletter && steps.commit.outputs.changed == 'true' }}
+        run: sleep 30
+
+      - name: ニュースレターを配信
+        if: ${{ !inputs.dry_run && !inputs.skip_newsletter && steps.commit.outputs.changed == 'true' }}
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          NEWSLETTER_SEND_TOKEN: ${{ secrets.NEWSLETTER_SEND_TOKEN }}
+        run: node scripts/send-newsletter.mjs
+
+      - name: 実行結果を要約に出力
+        if: ${{ always() && !inputs.dry_run }}
+        run: |
+          if [ -f .agent-run.json ]; then
+            {
+              echo "### 週次リサーチの結果"
+              echo ""
+              echo "- 記事: $(node -e "console.log(require('./.agent-run.json').article.title)")"
+              echo "- 出典数: $(node -e "console.log(require('./.agent-run.json').article.sourceCount)")"
+              echo "- カタログ更新: $(node -e "console.log(require('./.agent-run.json').caseNotes.length)") 件"
+              echo "- ランキング調整: $(node -e "console.log(require('./.agent-run.json').rankingNotes.length)") 件"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import rankings from '../../data/rankings.json';
+
+const total = (scores: Record<string, number>) =>
+  Object.values(scores).reduce((sum, value) => sum + value, 0);
+
+const ranked = [...rankings.methods].sort((a, b) => total(b.scores) - total(a.scores));
+const maxTotal = rankings.criteria.length * 5;
+---
+
+<BaseLayout
+  title="AI収益化手法ランキング"
+  description="AIを使った収益化手法を、収益ポテンシャル・参入しやすさ・初期コスト・立ち上がりの速さ・防御力の5軸で相対評価したランキングです。"
+>
+  <h1>AI収益化手法ランキング</h1>
+  <p style="color: var(--text-muted); max-width: 44rem;">
+    AIを使った収益化の代表的な手法を5軸で相対評価しました。最終更新 {rankings.updatedAt}。
+  </p>
+
+  <p class="note" style="margin: 1.5rem 0 2.5rem;">
+    <strong>スコアの読み方：</strong>{rankings.note}
+  </p>
+
+  <div class="table-scroll" style="margin-bottom: 3rem;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">順位</th>
+          <th scope="col">手法</th>
+          {rankings.criteria.map((criterion) => <th scope="col">{criterion.label}</th>)}
+          <th scope="col">合計</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          ranked.map((method, index) => (
+            <tr>
+              <td>{index + 1}</td>
+              <th scope="row"><a href={`#${method.id}`}>{method.name}</a></th>
+              {rankings.criteria.map((criterion) => (
+                <td>{(method.scores as Record<string, number>)[criterion.key]}</td>
+              ))}
+              <td><strong>{total(method.scores)} / {maxTotal}</strong></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <section class="section">
+    <div class="section__head"><h2>評価軸</h2></div>
+    <dl style="margin:0; font-size: 0.9rem;">
+      {
+        rankings.criteria.map((criterion) => (
+          <>
+            <dt style="font-weight:600; margin-top:0.8rem;">{criterion.label}</dt>
+            <dd style="margin:0 0 0 0; color: var(--text-muted);">{criterion.description}</dd>
+          </>
+        ))
+      }
+    </dl>
+  </section>
+
+  <section class="section">
+    <div class="section__head"><h2>各手法の詳細</h2></div>
+    <div class="stack" style="--gap: 1.1rem;">
+      {
+        ranked.map((method, index) => (
+          <article class="card" id={method.id}>
+            <span class="badge badge--accent">{index + 1}位 / {total(method.scores)}点</span>
+            <h3>{method.name}</h3>
+            <p>{method.summary}</p>
+            <p><strong style="color: var(--text);">向いている人：</strong>{method.bestFor}</p>
+            <p><strong style="color: var(--text);">つまずきやすい点：</strong>{method.pitfall}</p>
+            <div class="card__meta">
+              {rankings.criteria.map((criterion) => (
+                <span class="badge">
+                  {criterion.label} {(method.scores as Record<string, number>)[criterion.key]}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

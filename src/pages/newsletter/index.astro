@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SubscribeForm from '../../components/SubscribeForm.astro';
+import { SITE } from '../../config';
+---
+
+<BaseLayout
+  title="ニュースレター"
+  description={`${SITE.name} の週1回のニュースレター。AI収益化のリサーチ結果をまとめてお届けします。`}
+  narrow
+>
+  <h1>ニュースレター</h1>
+  <div class="prose">
+    <p>
+      週1回、{SITE.name} がその週にリサーチしたAI収益化の実例とノウハウをまとめてお送りします。
+    </p>
+    <ul>
+      <li>その週に追加した研究事例レポートの要約</li>
+      <li>事例カタログの更新点（料金改定・提供終了など）</li>
+      <li>収益化手法ランキングの変動</li>
+    </ul>
+    <h2>登録の流れ</h2>
+    <ol>
+      <li>下のフォームにメールアドレスを入力して登録します。</li>
+      <li>確認メールが届きます。</li>
+      <li>メール内のリンクをクリックすると購読が完了します。</li>
+    </ol>
+    <p>
+      配信は各メールのフッターにあるリンクからいつでも停止できます。
+      メールアドレスの取り扱いについては<a href="/privacy/">プライバシーポリシー</a>をご覧ください。
+    </p>
+  </div>
+
+  <div style="margin-top: 2.5rem;">
+    <SubscribeForm />
+  </div>
+</BaseLayout>

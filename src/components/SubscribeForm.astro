@@ -1,0 +1,196 @@
+---
+import { SITE } from '../config';
+
+interface Props {
+  heading?: string;
+  compact?: boolean;
+}
+
+const {
+  heading = '週1回、リサーチ結果をメールで受け取る',
+  compact = false,
+} = Astro.props;
+---
+
+<section class="subscribe" aria-labelledby="subscribe-heading">
+  <h2 id="subscribe-heading">{heading}</h2>
+  {
+    !compact && (
+      <p class="subscribe__lead">
+        {SITE.name} が毎週リサーチしたAI収益化の実例とノウハウを、まとめてお送りします。
+        配信はいつでも1クリックで停止できます。
+      </p>
+    )
+  }
+
+  <form class="subscribe__form" id="subscribe-form" novalidate>
+    <div class="subscribe__row">
+      <label class="visually-hidden" for="subscribe-email">メールアドレス</label>
+      <input
+        id="subscribe-email"
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        required
+        placeholder="you@example.com"
+        aria-describedby="subscribe-status"
+      />
+      <button class="btn" type="submit" data-submit>登録する</button>
+    </div>
+
+    {/* スパムボット対策。人間には見えない。 */}
+    <div class="subscribe__hp" aria-hidden="true">
+      <label>
+        この欄は入力しないでください
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+
+    <label class="subscribe__consent">
+      <input type="checkbox" name="consent" required />
+      <span>
+        <a href="/privacy/" target="_blank" rel="noopener">プライバシーポリシー</a>
+        に同意し、ニュースレターの配信を受け取ります。
+      </span>
+    </label>
+
+    <p class="subscribe__status" id="subscribe-status" role="status" aria-live="polite"></p>
+  </form>
+</section>
+
+<style>
+  .subscribe {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+  }
+  .subscribe h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.6rem;
+  }
+  .subscribe__lead {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 1.25rem;
+  }
+  .subscribe__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .subscribe__row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .subscribe__row input[type='email'] {
+    flex: 1 1 15rem;
+    min-width: 0;
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  .subscribe__row input[type='email']:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--ring);
+    outline: none;
+  }
+  .subscribe__hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .subscribe__consent {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .subscribe__consent input {
+    margin-top: 0.4rem;
+    flex: none;
+    accent-color: var(--accent);
+  }
+  .subscribe__status {
+    margin: 0;
+    font-size: 0.85rem;
+    min-height: 1.4em;
+  }
+  .subscribe__status[data-state='error'] { color: #c0392b; }
+  .subscribe__status[data-state='ok'] { color: var(--accent-text); }
+  @media (prefers-color-scheme: dark) {
+    .subscribe__status[data-state='error'] { color: #ef8b7c; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('subscribe-form') as HTMLFormElement | null;
+  const status = document.getElementById('subscribe-status');
+
+  if (form && status) {
+    const button = form.querySelector<HTMLButtonElement>('[data-submit]');
+
+    const setStatus = (message: string, state: 'ok' | 'error' | '') => {
+      status.textContent = message;
+      if (state) status.dataset.state = state;
+      else delete status.dataset.state;
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      const email = String(data.get('email') ?? '').trim();
+      const consent = data.get('consent') === 'on';
+      const website = String(data.get('website') ?? '');
+
+      if (!email || !email.includes('@')) {
+        setStatus('メールアドレスの形式を確認してください。', 'error');
+        return;
+      }
+      if (!consent) {
+        setStatus('プライバシーポリシーへの同意にチェックを入れてください。', 'error');
+        return;
+      }
+
+      if (button) button.disabled = true;
+      setStatus('送信しています…', '');
+
+      try {
+        const response = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email, consent, website }),
+        });
+        const result = (await response.json().catch(() => ({}))) as {
+          message?: string;
+          error?: string;
+        };
+
+        if (response.ok) {
+          setStatus(
+            result.message ??
+              '確認メールを送信しました。メール内のリンクをクリックすると登録が完了します。',
+            'ok'
+          );
+          form.reset();
+        } else {
+          setStatus(result.error ?? '登録に失敗しました。時間をおいて再度お試しください。', 'error');
+        }
+      } catch {
+        setStatus('通信に失敗しました。ネットワークを確認して再度お試しください。', 'error');
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  }
+</script>

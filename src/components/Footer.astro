@@ -1,0 +1,36 @@
+---
+import { SITE, PUBLISHER } from '../config';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__grid">
+      <div>
+        <h3>{SITE.name}</h3>
+        <p style="margin:0; max-width: 22rem;">{SITE.tagline}</p>
+      </div>
+      <div>
+        <h3>コンテンツ</h3>
+        <ul>
+          <li><a href="/articles/">記事一覧</a></li>
+          <li><a href="/cases/">収益化事例カタログ</a></li>
+          <li><a href="/rankings/">手法ランキング</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>サイト情報</h3>
+        <ul>
+          <li><a href="/about/">このサイトについて</a></li>
+          <li><a href="/privacy/">プライバシーポリシー</a></li>
+          <li><a href="/newsletter/">ニュースレター</a></li>
+          <li><a href={`mailto:${PUBLISHER.contactEmail}`}>お問い合わせ</a></li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin: 1.75rem 0 0; font-size: 0.8rem;">
+      © {year} {PUBLISHER.name}／{SITE.name}
+    </p>
+  </div>
+</footer>

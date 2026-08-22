@@ -1,0 +1,61 @@
+{
+  "updatedAt": "2026-08-22",
+  "note": "スコアは編集部およびリサーチエージェントによる相対評価であり、実測値ではありません。5段階で、収益ポテンシャル・参入しやすさ・立ち上がりの速さ・防御力が高いほど高得点、初期コストは低いほど高得点です。",
+  "criteria": [
+    { "key": "revenuePotential", "label": "収益ポテンシャル", "description": "上限がどこまで伸びるか" },
+    { "key": "accessibility", "label": "参入しやすさ", "description": "必要なスキル・体制の少なさ" },
+    { "key": "lowCost", "label": "初期コストの低さ", "description": "着手に必要な初期投資の小ささ" },
+    { "key": "speed", "label": "立ち上がりの速さ", "description": "最初の売上までの短さ" },
+    { "key": "moat", "label": "防御力", "description": "模倣されにくさ・継続性" }
+  ],
+  "methods": [
+    {
+      "id": "vertical-saas",
+      "name": "業種特化AI SaaS",
+      "summary": "特定業種の業務フローに深く入り込んだAIツールをサブスクで提供する。ドメイン知識が参入障壁になる。",
+      "scores": { "revenuePotential": 5, "accessibility": 2, "lowCost": 3, "speed": 2, "moat": 5 },
+      "bestFor": "対象業種の実務経験がある個人・小規模チーム",
+      "pitfall": "推論コストが売上に比例するため、価格設計を誤ると粗利が出ない。"
+    },
+    {
+      "id": "ai-agency",
+      "name": "AI導入支援・受託",
+      "summary": "企業のAI導入を設計・実装まで請け負う。ツールを作らずに最短で現金化できる。",
+      "scores": { "revenuePotential": 4, "accessibility": 4, "lowCost": 5, "speed": 5, "moat": 2 },
+      "bestFor": "すぐに収益化したい、営業できる個人",
+      "pitfall": "労働集約で、自分の時間が上限になる。仕組み化しないと頭打ちになる。"
+    },
+    {
+      "id": "digital-products",
+      "name": "AI制作のデジタル商材販売",
+      "summary": "テンプレート・プロンプト集・素材集などをAIで制作し買い切りで売る。在庫も配送も不要。",
+      "scores": { "revenuePotential": 3, "accessibility": 5, "lowCost": 5, "speed": 4, "moat": 1 },
+      "bestFor": "まず小さく試したい個人",
+      "pitfall": "模倣が容易。集客チャネルを持たないと売上がゼロのまま終わる。"
+    },
+    {
+      "id": "content-media",
+      "name": "AI活用メディア + 広告/アフィリエイト",
+      "summary": "AIで制作効率を上げたメディアを運営し、広告・アフィリエイト・スポンサーで収益化する。",
+      "scores": { "revenuePotential": 4, "accessibility": 4, "lowCost": 5, "speed": 1, "moat": 3 },
+      "bestFor": "長期でストック資産を作りたい個人",
+      "pitfall": "検索評価が出るまで時間がかかる。量産だけの低品質コンテンツは評価されない。"
+    },
+    {
+      "id": "api-wrapper",
+      "name": "特化型AIツール（単機能SaaS）",
+      "summary": "既存モデルのAPIを、特定の用途に絞ったUIで包んで提供する。開発期間が短い。",
+      "scores": { "revenuePotential": 3, "accessibility": 4, "lowCost": 4, "speed": 4, "moat": 1 },
+      "bestFor": "開発できる個人が短期で検証したい場合",
+      "pitfall": "基盤モデル側が同じ機能を標準搭載した瞬間に価値が消える。"
+    },
+    {
+      "id": "education",
+      "name": "AI教育・コミュニティ運営",
+      "summary": "AI活用の講座や有料コミュニティを運営し、月額または講座単位で課金する。",
+      "scores": { "revenuePotential": 4, "accessibility": 3, "lowCost": 4, "speed": 3, "moat": 3 },
+      "bestFor": "実績と発信力がある個人",
+      "pitfall": "情報の陳腐化が速く、継続的な更新コストが重い。"
+    }
+  ]
+}

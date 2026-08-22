@@ -1,0 +1,63 @@
+---
+import { SITE } from '../config';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** true にすると本文カラムを読みやすい幅に絞る */
+  narrow?: boolean;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  narrow = false,
+  noindex = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#b4531f" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#15140f" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE.name} — 新着記事`}
+      href="/rss.xml"
+    />
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main" class="visually-hidden">本文へスキップ</a>
+    <Header />
+    <main id="main">
+      <div class:list={['wrap', narrow && 'wrap--narrow']}>
+        <slot />
+      </div>
+    </main>
+    <Footer />
+  </body>
+</html>

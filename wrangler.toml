@@ -1,0 +1,41 @@
+# Cloudflare Workers 設定
+# 静的サイト（dist/）の配信と、購読API・配信APIを1つの Worker で提供する。
+name = "ai-monetize-news"
+main = "worker/index.ts"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ── 静的アセット ────────────────────────────────────────────
+# /api/* だけ Worker が処理し、それ以外は Astro のビルド結果を直接配信する。
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
+run_worker_first = ["/api/*"]
+
+# ── D1（購読者データベース） ────────────────────────────────
+# 作成: npx wrangler d1 create ai-monetize-news
+# 出力された database_id を下に貼り付ける。
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-monetize-news"
+database_id = "PLACEHOLDER_REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# ── 公開変数 ────────────────────────────────────────────────
+# デプロイ前に実在の値へ差し替える。
+[vars]
+SITE_URL = "https://ai-monetize-news.example.com"
+FROM_EMAIL = "news@example.com"
+FROM_NAME = "AI Monetize Lab"
+REPLY_TO_EMAIL = "contact@example.com"
+PUBLISHER_NAME = "（運営者名を記入）"
+PUBLISHER_ADDRESS = "（所在地を記入）"
+
+# ── シークレット（wrangler secret put で登録。ここには書かない） ──
+#   RESEND_API_KEY        … Resend の APIキー
+#   NEWSLETTER_SEND_TOKEN … /api/newsletter/send を叩くための共有シークレット
+#   UNSUBSCRIBE_SECRET    … 配信停止トークンのHMAC鍵（32バイト以上のランダム文字列）
+
+[observability]
+enabled = true

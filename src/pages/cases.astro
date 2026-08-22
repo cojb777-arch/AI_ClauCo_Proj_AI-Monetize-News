@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import casesData from '../../data/cases.json';
+
+const segments = [...new Set(casesData.cases.map((item) => item.segment))].sort((a, b) =>
+  a.localeCompare(b, 'ja')
+);
+const verifiedCount = casesData.cases.filter((item) => item.verified).length;
+---
+
+<BaseLayout
+  title="AI収益化事例カタログ"
+  description="AIで収益を上げているサービス・サイトを収益モデル別に整理したカタログです。週次エージェントが一次情報を確認して更新します。"
+>
+  <h1>AI収益化事例カタログ</h1>
+  <p style="color: var(--text-muted); max-width: 44rem;">
+    AIで収益を上げているサービスを「何で課金しているか」という軸で整理しています。
+    全{casesData.cases.length}件（うち一次情報の確認済み {verifiedCount} 件）。
+    最終更新 {casesData.updatedAt}。
+  </p>
+
+  <p class="note" style="margin: 1.5rem 0 2.5rem;">
+    <strong>数値の扱いについて：</strong>{casesData.note}
+  </p>
+
+  <ul class="tag-list" style="margin-bottom: 2rem;">
+    {segments.map((segment) => <li><a href={`#seg-${encodeURIComponent(segment)}`}>{segment}</a></li>)}
+  </ul>
+
+  <div class="table-scroll" style="margin-bottom: 3rem;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">サービス</th>
+          <th scope="col">セグメント</th>
+          <th scope="col">収益モデル</th>
+          <th scope="col">料金</th>
+          <th scope="col">再現難易度</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          casesData.cases.map((item) => (
+            <tr>
+              <th scope="row"><a href={`#${item.id}`}>{item.name}</a></th>
+              <td>{item.segment}</td>
+              <td>{item.models.join(' / ')}</td>
+              <td>{item.pricing ?? '未確認'}</td>
+              <td>{'★'.repeat(item.difficulty)}{'☆'.repeat(5 - item.difficulty)}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {
+    segments.map((segment) => (
+      <section class="section" id={`seg-${encodeURIComponent(segment)}`}>
+        <div class="section__head"><h2>{segment}</h2></div>
+        <div class="stack" style="--gap: 1.1rem;">
+          {casesData.cases
+            .filter((item) => item.segment === segment)
+            .map((item) => (
+              <article class="card" id={item.id}>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                  {item.models.map((model: string) => (
+                    <span class="badge badge--accent">{model}</span>
+                  ))}
+                  {!item.verified && <span class="badge">未検証</span>}
+                </div>
+                <h3>
+                  <a href={item.url} target="_blank" rel="noopener noreferrer">{item.name} ↗</a>
+                </h3>
+                <p>{item.summary}</p>
+                <p><strong style="color: var(--text);">課金の仕組み：</strong>{item.monetization}</p>
+                <div class="card__meta">
+                  <span>料金：{item.pricing ?? '未確認'}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>売上：{item.revenueNote}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>最終確認：{item.lastChecked ?? '未確認'}</span>
+                </div>
+              </article>
+            ))}
+        </div>
+      </section>
+    ))
+  }
+</BaseLayout>
