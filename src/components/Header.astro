@@ -1,0 +1,29 @@
+---
+import { SITE, NAV } from '../config';
+import { url } from '../lib/url';
+
+// Astro.url.pathname は base を含むので、比較対象も base 付きにそろえる。
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => {
+  const resolved = url(href);
+  return href === '/' ? path === resolved : path.startsWith(resolved);
+};
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={url('/')}>
+      <span class="brand__mark" aria-hidden="true">AI</span>
+      <span>{SITE.name}</span>
+    </a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      {
+        NAV.map((item) => (
+          <a href={url(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

@@ -1,2 +1,102 @@
-# AI_ClauCo_Proj_AI-Monetize-News
-AI Monetize Knowhow Distributor
+# AI Monetize Lab
+
+AIで収益を上げているサービスの実例と、その収益化ノウハウを**毎週リサーチして公開する**研究メディアです。
+
+リサーチ・執筆・カタログ更新・公開までを、週1回のエージェントが自動で実行します。
+
+---
+
+## できること
+
+| 機能 | 内容 |
+| --- | --- |
+| 研究記事の自動生成 | 毎週 Claude が Web検索でAI収益化事例を調査し、出典付きの記事を書いて公開する |
+| 収益化事例カタログ | 掲載済みサービスの料金・提供状況を毎週確認して更新する |
+| 手法ランキング | 収益化手法を5軸で相対評価し、根拠が出たときだけスコアを見直す |
+| RSS配信 | 更新をRSSフィードで購読できる |
+
+読者の個人情報は一切取得しません。会員登録もメールマガジンもフォームもない、静的サイトです。
+
+## 技術構成
+
+| 層 | 使うもの |
+| --- | --- |
+| サイト | Astro（静的生成） |
+| ホスティング | Cloudflare Workers または GitHub Pages（どちらも対応） |
+| リサーチ・執筆 | Claude API（Web検索ツール + 構造化出力） |
+| 定期実行 | GitHub Actions（cron） |
+
+サーバー側の処理を持たないため、静的ホスティングならどこにでも置けます。
+GitHub Actions のデプロイワークフローは Cloudflare Workers と GitHub Pages の
+両方に対応していて、設定した方だけが動きます（両方同時でも構いません）。
+サブディレクトリ配信（`<user>.github.io/<repo>/`）でもリンクが壊れないよう、
+サイト内リンクは `BASE_PATH` に追従します。
+
+---
+
+## ディレクトリ
+
+```
+src/                 Astro のサイト本体
+  content/articles/    記事Markdown（エージェントが追記する）
+  pages/               各ページ
+  components/          UIコンポーネント
+data/
+  cases.json           収益化事例カタログ
+  rankings.json        手法ランキング
+scripts/
+  weekly-research.mjs  週次リサーチエージェント
+.github/workflows/     定期実行・デプロイ・CI
+docs/SETUP.md          セットアップ手順
+```
+
+---
+
+## はじめかた
+
+セットアップは [`docs/SETUP.md`](docs/SETUP.md) にまとめてあります。
+
+```bash
+npm install
+npm run dev      # http://localhost:4321
+```
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm run dev` | 開発サーバー |
+| `npm run build` | サイトをビルド（`dist/`） |
+| `npm run preview` | ビルド結果をローカルで確認 |
+| `npm run deploy` | ビルドして Cloudflare へデプロイ |
+| `npm run agent:weekly -- --dry-run` | 週次リサーチを書き込みなしで試す |
+
+---
+
+## 記事の品質と法的リスクへの配慮
+
+エージェントには次の制約を課しています。
+
+**正確さ**
+- 売上・利用者数・料金などの数値は、一次情報で確認できたものだけ書く
+- 確認できなかった数値は「未確認」と明記し、推測で埋めない
+- すべての記事に出典リンクを添える
+- 自動生成であることを記事上に明示する
+- ランキングのスコア変更は1回あたり1点まで、理由を `changelog` に残す
+
+**著作権**
+- 参照元の文章をコピーせず、自分の言葉で書き直す
+- 引用が必要な場合のみ blockquote で最小限にとどめ、直後に出所を書く
+- 料金表などの事実データは転記せず、整理し直して出典を添える
+
+**名誉・信用**
+- 特定の個人・企業について、確認できない不利益な断定を書かない
+- 問題を指摘する場合は、確認できた事実と誰の見解かを分けて書く
+
+## 公開前に差し替えるもの
+
+- `src/config.ts` の `SITE`（サイト名）と `PUBLISHER`（運営者名・連絡先）
+- Cloudflare を使う場合: `wrangler.toml` の `name`、GitHub の Variables に `SITE_URL`
+- GitHub Pages を使う場合: Settings → Pages の Source を「GitHub Actions」にし、
+  Variables に `ENABLE_GITHUB_PAGES = true` を追加
+
+`/privacy/` のプライバシーポリシーと `/about/` の免責事項は雛形です。
+公開前に自分の運用に合っているか確認してください（本実装は法的助言ではありません）。

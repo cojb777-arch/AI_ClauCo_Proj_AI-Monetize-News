@@ -1,0 +1,58 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getPublishedArticles, getTagCounts, articleHref } from '../../lib/articles';
+import { CATEGORY_LABEL } from '../../config';
+import { url } from '../../lib/url';
+
+const articles = await getPublishedArticles();
+const tags = await getTagCounts();
+
+const categories = ['research', 'howto', 'digest'] as const;
+const countByCategory = Object.fromEntries(
+  categories.map((category) => [
+    category,
+    articles.filter((article) => article.data.category === category).length,
+  ])
+);
+---
+
+<BaseLayout title="記事一覧" description="AI収益化に関する研究事例レポート・ノウハウ解説・週次ダイジェストの一覧です。">
+  <h1>記事一覧</h1>
+  <p style="color: var(--text-muted); max-width: 42rem;">
+    全{articles.length}件。
+    {categories.map((category) => `${CATEGORY_LABEL[category]} ${countByCategory[category]}件`).join(' / ')}
+  </p>
+
+  {
+    tags.length > 0 && (
+      <ul class="tag-list" style="margin: 1.5rem 0 2.5rem;">
+        {tags.map(([tag, count]) => (
+          <li>
+            <a href={url(`/tags/${encodeURIComponent(tag)}/`)}>#{tag}（{count}）</a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    articles.length > 0 ? (
+      <div class="grid">
+        {articles.map((article) => (
+          <ArticleCard
+            href={articleHref(article)}
+            title={article.data.title}
+            description={article.data.description}
+            pubDate={article.data.pubDate}
+            category={article.data.category}
+            author={article.data.author}
+            sourceCount={article.data.sources.length}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="note">まだ記事がありません。</p>
+    )
+  }
+</BaseLayout>

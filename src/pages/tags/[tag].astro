@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { getPublishedArticles, articleHref } from '../../lib/articles';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const articles = await getPublishedArticles();
+  const tags = new Set(articles.flatMap((article) => article.data.tags));
+
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      articles: articles.filter((article) => article.data.tags.includes(tag)),
+    },
+  }));
+}
+
+const { tag, articles } = Astro.props;
+---
+
+<BaseLayout title={`#${tag} の記事`} description={`${tag} に関するAI収益化の記事一覧です。`}>
+  <h1>#{tag}</h1>
+  <p style="color: var(--text-muted);">{articles.length}件の記事</p>
+  <div class="grid" style="margin-top: 2rem;">
+    {
+      articles.map((article) => (
+        <ArticleCard
+          href={articleHref(article)}
+          title={article.data.title}
+          description={article.data.description}
+          pubDate={article.data.pubDate}
+          category={article.data.category}
+          author={article.data.author}
+          sourceCount={article.data.sources.length}
+        />
+      ))
+    }
+  </div>
+  <p style="margin-top: 2.5rem;"><a href={url('/articles/')}>← 記事一覧へ戻る</a></p>
+</BaseLayout>

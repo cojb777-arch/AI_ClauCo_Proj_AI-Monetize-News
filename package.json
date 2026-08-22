@@ -1,0 +1,26 @@
+{
+  "name": "ai-monetize-news",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI収益化の実例とノウハウを毎週リサーチして公開する研究メディア",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "deploy": "npm run build && wrangler deploy",
+    "agent:weekly": "node scripts/weekly-research.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.2.4",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.125.0",
+    "zod": "^4.4.3"
+  }
+}

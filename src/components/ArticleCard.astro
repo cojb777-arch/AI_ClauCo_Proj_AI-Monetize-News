@@ -1,0 +1,39 @@
+---
+import { CATEGORY_LABEL, AUTHOR_LABEL } from '../config';
+
+interface Props {
+  href: string;
+  title: string;
+  description: string;
+  pubDate: Date;
+  category: string;
+  author: string;
+  sourceCount?: number;
+}
+
+const { href, title, description, pubDate, category, author, sourceCount = 0 } =
+  Astro.props;
+
+const dateLabel = pubDate.toLocaleDateString('ja-JP', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<article class="card">
+  <span class="badge badge--accent">{CATEGORY_LABEL[category] ?? category}</span>
+  <h3><a href={href}>{title}</a></h3>
+  <p>{description}</p>
+  <div class="card__meta">
+    <time datetime={pubDate.toISOString()}>{dateLabel}</time>
+    <span aria-hidden="true">·</span>
+    <span>{AUTHOR_LABEL[author] ?? author}</span>
+    {sourceCount > 0 && (
+      <>
+        <span aria-hidden="true">·</span>
+        <span>出典 {sourceCount} 件</span>
+      </>
+    )}
+  </div>
+</article>
