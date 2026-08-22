@@ -95,8 +95,8 @@ npm run dev      # http://localhost:4321
 
 - `src/config.ts` の `SITE`（サイト名）と `PUBLISHER`（運営者名・連絡先）
 - Cloudflare を使う場合: `wrangler.toml` の `name`、GitHub の Variables に `SITE_URL`
-- GitHub Pages を使う場合: Settings → Pages の Source を「GitHub Actions」にし、
-  Variables に `ENABLE_GITHUB_PAGES = true` を追加
+- GitHub Pages を使う場合: Settings → Pages の Source を「GitHub Actions」に変更
+  （同じ画面の「Configure」ボタンは押さないこと。デプロイ処理はすでにあります）
 
 `/privacy/` のプライバシーポリシーと `/about/` の免責事項は雛形です。
 公開前に自分の運用に合っているか確認してください（本実装は法的助言ではありません）。
