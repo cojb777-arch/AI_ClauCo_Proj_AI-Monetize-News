@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-22",
+  "updatedAt": "2026-08-24",
   "note": "料金・利用者数などの変動する数値は、週次エージェントが一次情報（公式サイト・公式ブログ）を確認して埋めます。verified が false の項目は未検証です。",
   "cases": [
     {
@@ -42,16 +42,64 @@
       "url": "https://elevenlabs.io/",
       "segment": "音声合成",
       "models": ["フリーミアム", "従量課金", "API"],
-      "summary": "音声合成・音声クローンのプラットフォーム。文字数ベースのクレジット制で、個人クリエイターから開発者APIまで同じ従量軸で課金する。",
-      "monetization": "月間の生成文字数をクレジットとして販売。プラン超過分は追加購入、開発者はAPIから同じクレジットを消費する。",
-      "pricing": null,
-      "revenueNote": "未検証",
+      "summary": "音声合成・音声クローンのプラットフォーム。クレジット制で買い手に課金する一方、Voice Library に声を提供した個人へ生成文字数に応じて報酬を分配する両面市場でもある。",
+      "monetization": "買い手には月額プランに同梱するクレジットを販売（未使用分は最大2か月繰り越し、残高上限は月間枠の3倍。Free は繰り越し対象外）。不足分は繰り越し対象外の従量トップアップ。売り手（声の提供者）には、有料ユーザーの生成文字数に応じて Stripe Connect 経由で分配する。無料ユーザーの利用は分配対象外。",
+      "pricing": "月額プラン（同梱クレジット）: Free $0（10,000）/ Starter $6（30,000）/ Creator $22（121,000）/ Pro $99（600,000）/ Scale $299（1,800,000）/ Business $990（6,000,000）。年額は10か月分の支払いで2か月無料相当。商用ライセンスは Starter 以上。API 表示価格は1,000文字あたり v3・v2 Multilingual $0.10、v3 Conversational・Flash/Turbo $0.05。提供者への分配は既定で1,000文字あたり約$0.03（公式ブログ。ドキュメントには単価の記載なし）、支払いは最低$10・6〜8日ごと、対応64か国。",
+      "revenueNote": "自社売上は非公表。声の提供者への累計分配額は2026年5月22日公開の公式ブログで2,200万ドル超・提供者10,400人以上とされる（2025年11月時点は1,100万ドル）。",
       "startedYear": 2022,
       "difficulty": 5,
-      "verified": false,
-      "lastChecked": null,
+      "verified": true,
+      "lastChecked": "2026-08-24",
       "status": "active",
-      "sources": [{ "title": "ElevenLabs 公式サイト", "url": "https://elevenlabs.io/" }]
+      "sources": [
+        { "title": "ElevenLabs Pricing", "url": "https://elevenlabs.io/pricing" },
+        { "title": "ElevenAPI Pricing", "url": "https://elevenlabs.io/pricing/api" },
+        { "title": "Payouts - ElevenLabs Documentation", "url": "https://elevenlabs.io/docs/eleven-creative/voices/payouts" },
+        { "title": "Voice Library - ElevenLabs Documentation", "url": "https://elevenlabs.io/docs/eleven-creative/voices/voice-library" },
+        {
+          "title": "What are custom rates and credit multipliers? - ElevenLabs Documentation",
+          "url": "https://elevenlabs.io/docs/help-center/product/voice-customization/voice-library/what-are-custom-rates-and-credit-multipliers"
+        },
+        {
+          "title": "How to monetize your voice with ElevenLabs Voice Library",
+          "url": "https://elevenlabs.io/blog/monetize-your-voice-with-elevenlabs-voice-library-and-create-passive-income"
+        },
+        {
+          "title": "$22M earned by voice creators, doubling in 6 months",
+          "url": "https://elevenlabs.io/blog/22-million-earned-by-voice-creators-on-elevenlabs"
+        },
+        { "title": "The ElevenLabs Voice Library Addendum", "url": "https://elevenlabs.io/vla" }
+      ]
+    },
+    {
+      "id": "elevenlabs-voice-payouts",
+      "name": "ElevenLabs Voice Library への声の提供",
+      "url": "https://elevenlabs.io/payouts",
+      "segment": "音声合成",
+      "models": ["レベニューシェア"],
+      "summary": "自分の声を Professional Voice Clone として ElevenLabs の Voice Library に公開し、有料ユーザーがその声で生成した文字数に応じて報酬を受け取る形態。素材の提供者として両面市場の供給側に立つ。",
+      "monetization": "有料ユーザーの生成文字数に対する従量分配。分配額は利用者の料金プラン・生成文字数・Notice Period（公開取り下げ後の猶予期間、最短30日〜最長2年。長いほど報酬が増え、短縮は不可）で決まる。無料ユーザーの利用は対象外。",
+      "pricing": "既定の分配は1,000文字あたり約$0.03（公式ブログ。公式ドキュメントに単価の記載はない）。HQ・希少な声向けの最大$0.20のカスタムレートは、新規公開の声には使えないレガシー機能。参加には Creator プラン（$22/月）以上での Professional Voice Clone 作成、約2時間の録音（公式ブログは最低30分）、Voice Captcha による本人確認が必要。受け取り継続には Starter 以上の有料契約の維持が必要。支払いは Stripe Connect で最低$10・6〜8日ごと、対応64か国。税務申告は受取側の責任。",
+      "revenueNote": "個々の受取額は非公開。累計分配額は2026年5月22日公開の公式ブログで2,200万ドル超・提供者10,400人以上（2025年11月時点1,100万ドル）。1人あたり単純平均は約2,100ドルだが開始以来の累計であり、月収の目安ではない。",
+      "startedYear": null,
+      "difficulty": 2,
+      "verified": true,
+      "lastChecked": "2026-08-24",
+      "status": "active",
+      "sources": [
+        { "title": "Earn with Your Voice - ElevenLabs", "url": "https://elevenlabs.io/payouts" },
+        { "title": "Payouts - ElevenLabs Documentation", "url": "https://elevenlabs.io/docs/eleven-creative/voices/payouts" },
+        { "title": "Voice Library - ElevenLabs Documentation", "url": "https://elevenlabs.io/docs/eleven-creative/voices/voice-library" },
+        {
+          "title": "What are custom rates and credit multipliers? - ElevenLabs Documentation",
+          "url": "https://elevenlabs.io/docs/help-center/product/voice-customization/voice-library/what-are-custom-rates-and-credit-multipliers"
+        },
+        {
+          "title": "How to monetize your voice with ElevenLabs Voice Library",
+          "url": "https://elevenlabs.io/blog/monetize-your-voice-with-elevenlabs-voice-library-and-create-passive-income"
+        },
+        { "title": "The ElevenLabs Voice Library Addendum", "url": "https://elevenlabs.io/vla" }
+      ]
     },
     {
       "id": "cursor",
