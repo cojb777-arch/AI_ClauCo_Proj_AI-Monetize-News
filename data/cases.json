@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-24",
+  "updatedAt": "2026-08-31",
   "note": "料金・利用者数などの変動する数値は、週次エージェントが一次情報（公式サイト・公式ブログ）を確認して埋めます。verified が false の項目は未検証です。",
   "cases": [
     {
@@ -108,15 +108,18 @@
       "segment": "AI開発ツール",
       "models": ["フリーミアム", "サブスクリプション"],
       "summary": "AIを組み込んだコードエディタ。無料枠で日常的に使わせ、高性能モデルのリクエスト数を有料プランで開放する。",
-      "monetization": "個人向け月額サブスクとチーム向けプラン。モデル呼び出し回数が課金の主軸で、原価（推論コスト）と価格が直結する構造。",
-      "pricing": null,
-      "revenueNote": "未検証",
+      "monetization": "個人向け月額サブスクとチーム向けプラン。各有料プランに月次の利用枠を同梱し、超過分は同じAPIレートで従量課金（on-demand）に切り替わる。枠は請求サイクルごとにリセットされる。利用枠は自社モデル用と他社モデル用の2つのプールに分かれ、他社モデルはプロバイダのAPIレートで消費される。",
+      "pricing": "個人: Hobby $0 / Pro $20 / Pro Plus $60 / Ultra $200（月額）。Start はインド限定で₹649/月、自社モデル枠のみ。チーム: Standard $40・ユーザー/月 / Premium $120・ユーザー/月。Enterprise は個別見積もり。Teams・Enterprise の他社モデル利用には100万トークンあたり$0.25の Cursor Token Rate が上乗せされる。",
+      "revenueNote": "未検証（売上は非公表）",
       "startedYear": 2023,
       "difficulty": 5,
-      "verified": false,
-      "lastChecked": null,
+      "verified": true,
+      "lastChecked": "2026-08-31",
       "status": "active",
-      "sources": [{ "title": "Cursor 公式サイト", "url": "https://cursor.com/" }]
+      "sources": [
+        { "title": "Cursor Pricing", "url": "https://cursor.com/pricing" },
+        { "title": "Pricing - Cursor Docs", "url": "https://cursor.com/docs/account/pricing" }
+      ]
     },
     {
       "id": "github-copilot",
@@ -160,15 +163,15 @@
       "segment": "デジタル商材",
       "models": ["買い切り販売"],
       "summary": "プロンプト集・テンプレート・素材集などのデジタル商材をAIで制作し、Gumroad などのマーケットプレイスで買い切り販売する形態。個人が最短で着手できる代表例。",
-      "monetization": "1商材あたりの買い切り価格 × 販売数。在庫と配送がないため粗利率が高い一方、集客を自前のSNS・ブログに依存する。",
-      "pricing": null,
-      "revenueNote": "未検証",
+      "monetization": "1商材あたりの買い切り価格 × 販売数。在庫と配送がないため粗利率が高い一方、集客を自前のSNS・ブログに依存する。プラットフォーム側は月額を取らず、売上に対する手数料だけで収益化しており、流入経路によって手数料率が変わる。",
+      "pricing": "出品側の費用は月額0円。手数料は、自分のプロフィールや直リンク経由の売上が10% + 1件あたり$0.50、Gumroad の Discover マーケットプレイス経由で新規顧客が購入した場合は30%。決済処理手数料・支払スケジュール・最低支払額は料金ページに明記なし（未確認）。",
+      "revenueNote": "未検証（個々の販売者の売上は非公開）",
       "startedYear": null,
       "difficulty": 2,
-      "verified": false,
-      "lastChecked": null,
+      "verified": true,
+      "lastChecked": "2026-08-31",
       "status": "active",
-      "sources": [{ "title": "Gumroad 公式サイト", "url": "https://gumroad.com/" }]
+      "sources": [{ "title": "Gumroad Pricing", "url": "https://gumroad.com/pricing" }]
     },
     {
       "id": "ai-newsletter-sponsorship",
@@ -186,6 +189,52 @@
       "lastChecked": null,
       "status": "active",
       "sources": [{ "title": "beehiiv 公式サイト", "url": "https://www.beehiiv.com/" }]
+    },
+    {
+      "id": "cloudflare-pay-per-crawl",
+      "name": "Cloudflare Pay Per Crawl",
+      "url": "https://developers.cloudflare.com/ai-crawl-control/features/pay-per-crawl/",
+      "segment": "コンテンツ収益化",
+      "models": ["従量課金", "レベニューシェア"],
+      "summary": "サイト運営者がAIクローラーに対してクロール1回あたりの価格を設定し、HTTP 402 Payment Required を使って課金する仕組み。広告インプレッションではなく「取得リクエスト」を課金単位に置き換える試み。Cloudflare が決済主体（merchant of record）として集計・精算する。",
+      "monetization": "成功レスポンス（HTTP 200）1回ごとの従量課金。価格はゾーン単位で一律に設定し、クローラーごとには Allow / Charge / Block の3つの動作を選ぶ。受動フローでは 402 と crawler-price ヘッダで価格を提示し、crawler-exact-price を付けた再送で本文を返す。能動フローではクローラーが crawler-max-price で上限を提示し、範囲内なら 200 と crawler-charged を返す。再クロールは都度課金。robots.txt・sitemap.xml・security.txt・.well-known/security.txt・crawlers.json は常に無料。エラー応答は課金されない。",
+      "pricing": "サイト側が設定する価格は1クロールあたり最低 $0.001（USD）、上限の記載なし。既定はサイト全体一律で、コンテンツ種別ごとの料率は上級設定として案内されている。Cloudflare の手数料率・取り分・最低支払額は非公開。受け取りは Stripe Connect 経由の月次支払いで、決済サイクルと最低支払額の対象と記載されるが金額の明示はない。未収残高はダッシュボードに表示されず、Cloudflare への問い合わせが必要。2026年7月28日時点のドキュメント記載でクローズドベータ、申込フォームからの応募制。",
+      "revenueNote": "未確認。ベータのため手数料率・最低支払額・受取実績とも公開されていない。前提となる市況として、Cloudflare が2026年7月1日に公開したレポートは、2026年6月時点で同社ネットワーク上のクローラーリクエストの52%が学習目的（2025年春は22%）、混在クローラーが36%超、非人間エージェントのトラフィックが初めて50%超と報告している。",
+      "startedYear": 2025,
+      "difficulty": 4,
+      "verified": true,
+      "lastChecked": "2026-08-31",
+      "status": "beta",
+      "sources": [
+        {
+          "title": "What is pay per crawl? - Cloudflare AI Crawl Control docs",
+          "url": "https://developers.cloudflare.com/ai-crawl-control/features/pay-per-crawl/what-is-pay-per-crawl/"
+        },
+        {
+          "title": "Set a pay per crawl price - Cloudflare AI Crawl Control docs",
+          "url": "https://developers.cloudflare.com/ai-crawl-control/features/pay-per-crawl/use-pay-per-crawl-as-site-owner/set-a-pay-per-crawl-price/"
+        },
+        {
+          "title": "Pay per crawl FAQ - Cloudflare AI Crawl Control docs",
+          "url": "https://developers.cloudflare.com/ai-crawl-control/features/pay-per-crawl/faq/"
+        },
+        {
+          "title": "Manage payouts - Cloudflare AI Crawl Control docs",
+          "url": "https://developers.cloudflare.com/ai-crawl-control/features/pay-per-crawl/use-pay-per-crawl-as-site-owner/manage-payouts/"
+        },
+        {
+          "title": "Introducing pay per crawl: enforce your role in AI",
+          "url": "https://blog.cloudflare.com/introducing-pay-per-crawl/"
+        },
+        {
+          "title": "Your site, your rules: new AI traffic options for all customers",
+          "url": "https://blog.cloudflare.com/content-independence-day-ai-options/"
+        },
+        {
+          "title": "Content Independence Day, one year on",
+          "url": "https://blog.cloudflare.com/agentic-internet-bot-report/"
+        }
+      ]
     }
   ]
 }
