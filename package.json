@@ -13,12 +13,12 @@
     "validate": "node scripts/validate-content.mjs --local"
   },
   "dependencies": {
-    "astro": "^7.2.4",
+    "astro": "^7.2.9",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.127.1"
   }
 }
